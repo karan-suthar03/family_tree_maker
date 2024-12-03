@@ -13,7 +13,7 @@
         android:theme="@style/Theme.FamilyTree"
         tools:targetApi="31">
         <activity
-            android:name=".TreeMenu"
+            android:name=".TreeMenu.TreeMenuActivity"
             android:exported="false" />
         <activity
             android:name=".SketchActivity"

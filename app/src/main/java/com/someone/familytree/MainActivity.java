@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+import com.someone.familytree.TreeMenu.TreeMenuActivity;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
@@ -151,6 +152,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        Intent intent = new Intent(MainActivity.this, TreeMenuActivity.class);
+        startActivity(intent);
+
+        finish();
 
         familyDatabase = FamilyDatabase.getDatabase(this);
         Thread thread = getThread();

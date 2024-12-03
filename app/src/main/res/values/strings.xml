@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">family tree</string>
+    <string name="app_name">Family Tree</string>
     <string name="add_new_member">add new member</string>
     <string name="add_parent">Add Parent</string>
     <string name="add_child">Add Child</string>
