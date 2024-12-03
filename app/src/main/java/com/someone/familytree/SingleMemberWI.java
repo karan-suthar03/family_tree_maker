@@ -7,8 +7,9 @@ public class SingleMemberWI {
     int id;
     String name;
     List<SingleMemberWI> children;
+    int treeId;
 
-    public SingleMemberWI(String name,int id) {
+    public SingleMemberWI(String name,int id, int treeId) {
         this.name = name;
         this.id = id;
         children = new ArrayList<>();

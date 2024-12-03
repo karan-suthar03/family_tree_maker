@@ -16,6 +16,8 @@ import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.someone.familytree.database.FamilyDatabase;
+import com.someone.familytree.database.FamilyMember;
 
 import java.util.List;
 
@@ -33,6 +35,8 @@ public class SketchActivity extends AppCompatActivity {
 
     ExtendedFloatingActionButton fab;
 
+    int treeId;
+
     CardView detailView;
     ConstraintLayout createNewMemberLayout;
     ConstraintLayout personCardContainer;
@@ -42,6 +46,12 @@ public class SketchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sketch);
+
+        treeId = getIntent().getIntExtra("treeId", -1);
+
+        if(treeId == -1){
+            throw new IllegalArgumentException("TreeId is required");
+        }
 
         detailView = findViewById(R.id.personCard);
 
@@ -100,11 +110,11 @@ public class SketchActivity extends AppCompatActivity {
     }
     private void loadFamilyData() {
 
-        List<FamilyMember> familyMembers = familyDatabase.familyMemberDao().getChildren(0);
+        List<FamilyMember> familyMembers = familyDatabase.familyDao().getChildren(0, treeId);
         FamilyMember familyMember;
         if (!familyMembers.isEmpty()) {
             familyMember = familyMembers.get(0);
-            rootWI = new SingleMemberWI(familyMember.getName(), familyMember.getId());
+            rootWI = new SingleMemberWI(familyMember.getName(), familyMember.getId(), treeId);
             convertToSingleMemberWI(rootWI, rootWI.id);
         }
 
@@ -114,15 +124,13 @@ public class SketchActivity extends AppCompatActivity {
     public void showAddMemberOption() {
         runOnUiThread(() -> {
             fab.setVisibility(View.VISIBLE);
-            fab.setOnClickListener(v -> {
-                addNewChild(0);
-            });
+            fab.setOnClickListener(v -> addNewChild(0));
         });
     }
 
     private void convertToSingleMemberWI(SingleMemberWI parent, int id) {
-        for (FamilyMember member : familyDatabase.familyMemberDao().getChildren(id)) {
-            SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId());
+        for (FamilyMember member : familyDatabase.familyDao().getChildren(id, treeId)) {
+            SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId(),treeId);
             parent.addChildren(child);
 
             convertToSingleMemberWI(child, member.getId());
@@ -142,7 +150,7 @@ public class SketchActivity extends AppCompatActivity {
     }
 
     public void showPersonCard(float x, float y, int id, int nodeHeight) {
-        FamilyMember familyMember = familyDatabase.familyMemberDao().getMember(id);
+        FamilyMember familyMember = familyDatabase.familyDao().getMember(id);
         if(x + (float) detailViewWidth /2 > personCardContainer.getWidth()){
             x = personCardContainer.getWidth() - (float) detailViewWidth /2;
         }
@@ -203,9 +211,9 @@ public class SketchActivity extends AppCompatActivity {
                 Log.d("MemberName", memberName);
                 Thread thread = new Thread(() -> {
                     int parentId = 0;
-                    FamilyMember newParent = new FamilyMember(memberName, parentId);
-                    int newParentId = (int) familyDatabase.familyMemberDao().insert(newParent);
-                    familyDatabase.familyMemberDao().updateParentId(familyMember.getId(), newParentId);
+                    FamilyMember newParent = new FamilyMember(memberName, parentId, treeId);
+                    int newParentId = (int) familyDatabase.familyDao().insertMember(newParent);
+                    familyDatabase.familyDao().updateParentId(familyMember.getId(), newParentId, treeId);
                     TreeHandler.refreshTree();
                     if(fab.getVisibility() == View.VISIBLE){
                         runOnUiThread(() -> fab.setVisibility(View.GONE));
@@ -234,8 +242,8 @@ public class SketchActivity extends AppCompatActivity {
             }else{
                 Log.d("MemberName", memberName);
                 Thread thread = new Thread(() -> {
-                    FamilyMember familyMember = new FamilyMember(memberName, id);
-                    familyDatabase.familyMemberDao().insert(familyMember);
+                    FamilyMember familyMember = new FamilyMember(memberName, id, treeId);
+                    familyDatabase.familyDao().insertMember(familyMember);
                     TreeHandler.refreshTree();
                     if(fab.getVisibility() == View.VISIBLE){
                         runOnUiThread(() -> fab.setVisibility(View.GONE));

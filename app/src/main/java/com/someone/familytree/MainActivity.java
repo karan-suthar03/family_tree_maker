@@ -10,10 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+import com.someone.familytree.database.FamilyDatabase;
+import com.someone.familytree.database.FamilyMember;
+import com.someone.familytree.database.FamilyTreeTable;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    String newTestTreeName = "testTree";
 
     String familyJson = "{\n" +
             "    \"name\": \"root\",\n" +
@@ -137,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
         String name;
         List<singleMember> children;
     }
+
     SingleMemberWI rootWI;
 
 
@@ -149,28 +155,32 @@ public class MainActivity extends AppCompatActivity {
         familyDatabase = FamilyDatabase.getDatabase(this);
         Thread thread = getThread();
         thread.start();
-
-
     }
 
     private @NonNull Thread getThread() {
         Gson gson = new Gson();
         singleMember root = gson.fromJson(familyJson, singleMember.class);
 
-
         return new Thread(() -> {
 
-//            familyDatabase.familyMemberDao().deleteAll();
-//
-//            addAllMembers(root, 0);
+            FamilyTreeTable familyTreeTable = new FamilyTreeTable(newTestTreeName);
+            int treeId = (int) familyDatabase.familyDao().insertTree(familyTreeTable);
 
-            printAllMembers();
+            int rootId = (int) familyDatabase.familyDao().insertMember(new FamilyMember(root.name, 0, treeId));
+
+            rootWI = new SingleMemberWI(root.name, rootId, treeId);
+            addAllMembers(root, rootId, treeId);
+
+            convertToSingleMemberWI(rootWI, rootId, treeId);
+
+            printAllMembers(treeId);
             Button button = findViewById(R.id.button);
             button.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, SketchActivity.class);
+                // put extra tree id
+                intent.putExtra("treeId", treeId);
                 startActivity(intent);
             });
-
         });
     }
 
@@ -184,33 +194,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void convertToSingleMemberWI(SingleMemberWI rootWI, int parentId) {
-        List<FamilyMember> members = familyDatabase.familyMemberDao().getChildren(parentId);
+    private void convertToSingleMemberWI(SingleMemberWI rootWI, int parentId, int treeId) {
+        List<FamilyMember> members = familyDatabase.familyDao().getChildren(parentId, treeId);
 
         for (FamilyMember member : members) {
-            SingleMemberWI singleMemberWI = new SingleMemberWI(member.getName(), member.getId());
+            SingleMemberWI singleMemberWI = new SingleMemberWI(member.getName(), member.getId(), treeId);
             rootWI.addChildren(singleMemberWI);
-            convertToSingleMemberWI(singleMemberWI, member.getId());
+            convertToSingleMemberWI(singleMemberWI, member.getId(), treeId);
         }
     }
 
-    private void addAllMembers(singleMember member, int parentId) {
+    private void addAllMembers(singleMember member, int parentId, int treeId) {
         if (member == null) {
             return;
         }
-        FamilyMember familyMember = new FamilyMember(member.name, parentId);
+        FamilyMember familyMember = new FamilyMember(member.name, parentId, treeId);
 
-        long memberId = familyDatabase.familyMemberDao().insert(familyMember);
+        long memberId = familyDatabase.familyDao().insertMember(familyMember);
 
         familyMember.setId((int) memberId);
 
         for (singleMember child : member.children) {
-            addAllMembers(child, familyMember.getId());
+            addAllMembers(child, familyMember.getId(), treeId);
         }
     }
 
-    private void printAllMembers() {
-        List<FamilyMember> members = familyDatabase.familyMemberDao().getAllMembers();
+    private void printAllMembers(int treeId) {
+        List<FamilyMember> members = familyDatabase.familyDao().getAllMembers(treeId);
         for (FamilyMember member : members) {
             Log.d("FamilyMember", member.getName() + " " + member.getId() + " " + member.getParentId());
         }

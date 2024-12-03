@@ -1,22 +1,22 @@
-package com.someone.familytree;
+package com.someone.familytree.database;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "family_tree")
+@Entity(tableName = "family_tree_members")
 public class FamilyMember {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
     private int parentId;
+    private int treeId;
 
-    // Constructor
-    public FamilyMember(String name, int parentId) {
+    public FamilyMember(String name, int parentId, int treeId) {
         this.name = name;
         this.parentId = parentId;
+        this.treeId = treeId;
     }
 
-    // Getters
     public int getId() {
         return id;
     }
@@ -29,7 +29,6 @@ public class FamilyMember {
         return parentId;
     }
 
-    // Setters
     public void setId(int id) {
         this.id = id;
     }
@@ -41,5 +40,13 @@ public class FamilyMember {
     public int setParentId(int parentId) {
         this.parentId = parentId;
         return parentId;
+    }
+
+    public int getTreeId() {
+        return treeId;
+    }
+
+    public void setTreeId(int treeId) {
+        this.treeId = treeId;
     }
 }
