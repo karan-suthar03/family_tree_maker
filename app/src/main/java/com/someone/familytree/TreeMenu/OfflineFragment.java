@@ -27,7 +27,15 @@ import java.util.List;
 
 public class OfflineFragment extends Fragment {
     private final List<Item> itemList = new ArrayList<>();
+    ItemAdapter itemAdapter;
     ConstraintLayout addTreeLayout;
+    TreeMenuActivity treeMenuActivity;
+
+    public OfflineFragment(TreeMenuActivity treeMenuActivity) {
+        super();
+        this.treeMenuActivity = treeMenuActivity;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tree_menu, container, false);
@@ -46,17 +54,19 @@ public class OfflineFragment extends Fragment {
 
             addTreeLayout = view.findViewById(R.id.addTreeLayout);
 
-            addTreeLayout.setVisibility(View.GONE);
-
-            addTreeButton.setOnClickListener(v -> {
-                showAddTreeDialog();
-            });
 
             new Handler(Looper.getMainLooper()).post(() -> {
-                ItemAdapter itemAdapter = new ItemAdapter(itemList);
+
+                addTreeLayout.setVisibility(View.GONE);
+
+                addTreeButton.setOnClickListener(v -> {
+                    showAddTreeDialog();
+                });
+                itemAdapter = new ItemAdapter(itemList, treeMenuActivity);
                 recyclerView.setAdapter(itemAdapter);
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(requireContext()));
+
             });
 
         }).start();

@@ -117,6 +117,11 @@ public class TreeHandler{
         }
     }
 
+    public static void clear() {
+        nodes = new ArrayList<>();
+        lines = new ArrayList<>();
+    }
+
     static class Node {
         public String name;
         public PVector position;
@@ -128,7 +133,6 @@ public class TreeHandler{
             this.id = id;
         }
     }
-
 
     public static void setRootWI(SingleMemberWI rootWI, Sketch sketch) {
         TreeHandler.rootWI = rootWI;

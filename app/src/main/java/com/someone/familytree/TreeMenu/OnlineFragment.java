@@ -18,6 +18,12 @@ public class OnlineFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private final List<Item> itemList = new ArrayList<>();
+    TreeMenuActivity treeMenuActivity;
+
+    public OnlineFragment(TreeMenuActivity treeMenuActivity) {
+        super();
+        this.treeMenuActivity = treeMenuActivity;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

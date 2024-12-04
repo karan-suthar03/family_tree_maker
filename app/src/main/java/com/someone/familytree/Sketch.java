@@ -45,12 +45,10 @@ public class Sketch extends PApplet {
     }
 
     public void draw() {
-
         background(255);
         //font colour black
         fill(0);
         text(frameRate, 100, 100);
-
         DrawTree();
     }
 
@@ -129,5 +127,12 @@ public class Sketch extends PApplet {
         isDragging = false;
         // Reset zooming state
         lastTouchDist = 0;
+    }
+
+    @Override
+    public void onDestroy() {
+        sketchActivity = null;
+        TreeHandler.clear();
+        super.onDestroy();
     }
 }

@@ -65,13 +65,27 @@ public class SketchActivity extends AppCompatActivity {
         OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled */) {
             @Override
             public void handleOnBackPressed() {
-                if(createNewMemberLayout.getVisibility() == View.VISIBLE){
+                if (createNewMemberLayout.getVisibility() == View.VISIBLE) {
                     hideNewMemberLayout();
-                }else {
+                } else {
+                    // Clean up resources
+                    if (sketch != null) {
+                        sketch.exit(); // Stop or dispose of the sketch
+                    }
+                    if (fragment != null) {
+                        fragment.dispose(); // Dispose of any resources related to the fragment
+                    }
+
+                    // Optionally, call System.exit(0) to force app termination
+                    // System.exit(0); // Use this only if you want the app to completely terminate
+
+                    // Finish the activity
                     finish();
                 }
             }
         };
+
+
         getOnBackPressedDispatcher().addCallback(this, callback);
         // Find the container for the sketch
         FrameLayout canvasContainer = findViewById(R.id.sketchCanvas);
@@ -262,7 +276,6 @@ public class SketchActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(createNewMemberLayout.getWindowToken(), 0);
     }
-
 
     public void hidePersonCard() {
         runOnUiThread(() -> personCardContainer.setVisibility(View.GONE));
