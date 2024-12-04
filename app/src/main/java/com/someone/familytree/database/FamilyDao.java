@@ -3,6 +3,7 @@ package com.someone.familytree.database;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -43,4 +44,10 @@ public interface FamilyDao {
 
     @Query("UPDATE family_tree_members SET parentId = :id1 WHERE id = :id AND treeId = :treeId")
     void updateParentId(int id, int id1, int treeId);
+
+    @Query("DELETE FROM family_tree WHERE id = :id")
+    void deleteTree(int id);
+
+    @Update
+    void updateTree(FamilyTreeTable familyTreeTable);
 }

@@ -3,21 +3,5 @@
     <item
         android:id="@+id/settings"
         android:title="Settings"
-        android:visible="false"/>
-    <item
-        android:id="@+id/sync"
-        android:title="Sync"
-        android:visible="false"/>
-    <item
-        android:id="@+id/feedback"
-        android:title="Feedback"
-        android:visible="false"/>
-    <item
-        android:id="@+id/help"
-        android:title="Help"
-        android:visible="false"/>
-    <item
-        android:id="@+id/about"
-        android:title="About"
-        android:visible="false"/>
+        android:visible="true"/>
 </menu>

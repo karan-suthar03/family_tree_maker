@@ -16,7 +16,6 @@ import java.util.List;
 
 public class OnlineFragment extends Fragment {
     private RecyclerView recyclerView;
-    private ItemAdapter itemAdapter;
     private final List<Item> itemList = new ArrayList<>();
     TreeMenuActivity treeMenuActivity;
 

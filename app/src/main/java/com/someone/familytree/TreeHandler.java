@@ -11,20 +11,15 @@ import processing.core.PApplet;
 import processing.core.PVector;
 
 public class TreeHandler{
+
     static SingleMemberWI rootWI;
     static Sketch sketch;
     static ArrayList<Node> nodes = new ArrayList<>();
-
     static ArrayList<Node> TempNodes = new ArrayList<>();
-
     static int nodeHeight = 50;
-
     static ArrayList<PVector[]> lines = new ArrayList<>();
-
     static ArrayList<PVector[]> TempLines = new ArrayList<>();
-
     static FamilyDatabase familyDatabase;
-
     static float nodeWidth = 100;
 
     public static void drawTree(float zoomLevel) {

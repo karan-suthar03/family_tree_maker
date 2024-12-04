@@ -4,16 +4,11 @@
         android:id="@+id/duplicate"
         android:title="Duplicate"
         android:visible="true"/>
-    <item
-        android:id="@+id/delete"
-        android:title="Delete"
-        android:visible="true"/>
-    <item
-        android:id="@+id/upload"
-        android:title="Upload"
-        android:visible="true"/>
-    <item
-        android:id="@+id/share"
+    <item android:id="@+id/share"
         android:title="Share"
+        android:visible="true"/>
+    <item
+        android:id="@+id/edit"
+        android:title="Edit"
         android:visible="true"/>
 </menu>

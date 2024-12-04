@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SingleMemberWI {
-    int id;
+    public int id;
     String name;
     List<SingleMemberWI> children;
     int treeId;

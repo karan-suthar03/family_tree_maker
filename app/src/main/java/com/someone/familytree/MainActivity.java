@@ -158,9 +158,9 @@ public class MainActivity extends AppCompatActivity {
 
         finish();
 
-        familyDatabase = FamilyDatabase.getDatabase(this);
-        Thread thread = getThread();
-        thread.start();
+//        familyDatabase = FamilyDatabase.getDatabase(this);
+//        Thread thread = getThread();
+//        thread.start();
     }
 
     private @NonNull Thread getThread() {
