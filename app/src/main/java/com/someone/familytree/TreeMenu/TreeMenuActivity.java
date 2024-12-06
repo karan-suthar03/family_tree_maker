@@ -110,7 +110,6 @@ public class TreeMenuActivity extends AppCompatActivity {
                         Log.d("TreeMenuActivity", "Edit clicked");
                         int id = itemList.get(0);
                         offlineFragment.editTree(id);
-                        offlineFragment.refreshList();
                         selectedToolbarLayout.setVisibility(View.GONE);
                         return true;
                     }else if (item.getItemId() == R.id.duplicate) {

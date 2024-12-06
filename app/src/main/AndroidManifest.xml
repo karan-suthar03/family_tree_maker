@@ -19,7 +19,7 @@
             android:name=".TreeMenu.TreeMenuActivity"
             android:exported="false" />
         <activity
-            android:name=".SketchActivity"
+            android:name=".Sketch.SketchActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

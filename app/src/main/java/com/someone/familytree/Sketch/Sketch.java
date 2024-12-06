@@ -1,4 +1,9 @@
-package com.someone.familytree;
+package com.someone.familytree.Sketch;
+
+import static com.someone.familytree.Sketch.TreeHandler.nodeHeight;
+import static com.someone.familytree.Sketch.TreeHandler.nodeWidth;
+
+import com.someone.familytree.SingleMemberWI;
 
 import processing.core.PApplet;
 import processing.core.PVector;
@@ -32,6 +37,15 @@ public class Sketch extends PApplet {
         cHeight = height;
         TreeHandler.setRootWI(rootWI, this);
         this.sketchActivity = sketchActivity;
+        TreeHandler.shadow = createGraphics((int) (((int)nodeWidth+10)*0.5), (int) ((nodeHeight+10)*0.5));
+        TreeHandler.shadow.beginDraw();
+        TreeHandler.shadow.noStroke();
+        for (int i = 20; i > 0; i--) {  // Layered shadow for softness
+            float alpha = map(i, 0, 20, 0, 50);  // Adjust opacity
+            TreeHandler.shadow.fill(50, alpha);  // Dark grey with transparency
+            TreeHandler.shadow.rect(0, 0, (int)nodeWidth, nodeHeight, 10);  // Rounded rectangle
+        }
+        TreeHandler.shadow.endDraw();
     }
 
     public void setup() {
@@ -45,7 +59,23 @@ public class Sketch extends PApplet {
     }
 
     public void draw() {
-        background(255);
+        background(25);
+        //draw grid
+        stroke(255, 50);
+        strokeWeight(2);
+        for (int i = width/2; i < width; i += 100 * zoomLevel) {
+            line(i, 0, i, height);
+        }
+        for (int i = width/2; i > 0; i -= 100 * zoomLevel) {
+            line(i, 0, i, height);
+        }
+        for (int i = height/2; i < height; i += 100 * zoomLevel) {
+            line(0, i, width, i);
+        }
+        for (int i = height/2; i > 0; i -= 100 * zoomLevel) {
+            line(0, i, width, i);
+        }
+
         //font colour black
         fill(0);
         text(frameRate, 100, 100);
@@ -73,8 +103,10 @@ public class Sketch extends PApplet {
             lastTouchDist = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
             isZooming = true;
         }
-        sketchActivity.hidePersonCard();
+        sketchActivity.uiHandler.cardViewHandler.hidePersonCard();
     }
+
+
 
     private void TouchInPut(float x, float y) {
         float touchPosX = (x - (float) width / 2) / zoomLevel - offsetX;

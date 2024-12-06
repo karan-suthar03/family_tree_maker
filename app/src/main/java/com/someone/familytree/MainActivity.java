@@ -9,12 +9,13 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.gson.Gson;
+import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.TreeMenu.TreeMenuActivity;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -164,8 +165,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private @NonNull Thread getThread() {
-        Gson gson = new Gson();
-        singleMember root = gson.fromJson(familyJson, singleMember.class);
+        singleMember root = new singleMember();
+        root.name = "root";
+        root.children = new ArrayList<>();
+//
+//        int depth = 5;
+//
+//        makeTree(root,depth);
 
         return new Thread(() -> {
 
@@ -188,6 +194,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         });
+    }
+
+    private void makeTree(singleMember root, int depth) {
+        if (depth == 0) {
+            return;
+        }
+        singleMember child1 = new singleMember();
+        child1.name = "child1";
+        child1.children = new ArrayList<>();
+        root.children.add(child1);
+
+        singleMember child2 = new singleMember();
+        child2.name = "child2";
+        child2.children = new ArrayList<>();
+        root.children.add(child2);
+
+        makeTree(child1, depth - 1);
+        makeTree(child2, depth - 1);
     }
 
     private void printAllMembersWI(SingleMemberWI rootWI) {

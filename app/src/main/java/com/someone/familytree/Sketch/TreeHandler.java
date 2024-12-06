@@ -1,5 +1,6 @@
-package com.someone.familytree;
+package com.someone.familytree.Sketch;
 
+import com.someone.familytree.SingleMemberWI;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 
@@ -8,10 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
 
 public class TreeHandler{
-
+    static float gridWidth = 100;
     static SingleMemberWI rootWI;
     static Sketch sketch;
     static ArrayList<Node> nodes = new ArrayList<>();
@@ -19,16 +21,19 @@ public class TreeHandler{
     static int nodeHeight = 50;
     static ArrayList<PVector[]> lines = new ArrayList<>();
     static ArrayList<PVector[]> TempLines = new ArrayList<>();
-    static FamilyDatabase familyDatabase;
+    public static FamilyDatabase familyDatabase;
     static float nodeWidth = 100;
+    static public PGraphics shadow;
 
     public static void drawTree(float zoomLevel) {
+
         float strokeWeight = PApplet.constrain(2 / zoomLevel, 1, 5);
+
         Iterator<PVector[]> lineIterator = lines.iterator();
         while (lineIterator.hasNext()) {
             PVector[] line = lineIterator.next();
             sketch.strokeWeight(strokeWeight);
-            sketch.stroke(0);
+            sketch.stroke(255);
             sketch.line(line[0].x, line[0].y + (float) TreeHandler.nodeHeight /2, line[1].x, line[1].y -  (float) TreeHandler.nodeHeight /2);
         }
 
@@ -42,7 +47,9 @@ public class TreeHandler{
             }
             sketch.strokeWeight(strokeWeight);
             sketch.stroke(0);
-            sketch.rect(node.position.x - nodeWidth / 2, node.position.y - (float) nodeHeight / 2, nodeWidth, nodeHeight);
+//            sketch.rect(node.position.x - nodeWidth / 2, node.position.y - (float) nodeHeight / 2, nodeWidth, nodeHeight);
+            //rounded rectangle
+            sketch.rect(node.position.x - nodeWidth / 2, node.position.y - (float) nodeHeight / 2, nodeWidth, nodeHeight, 100);
             sketch.fill(0);
             sketch.noStroke();
             String name = node.name;
@@ -77,7 +84,8 @@ public class TreeHandler{
     private static void showDetails(Node node) {
         float x = (node.position.x + sketch.offsetX) * sketch.zoomLevel + (float) sketch.width / 2;
         float y = (node.position.y + sketch.offsetY) * sketch.zoomLevel + (float) sketch.height / 2;
-        sketch.sketchActivity.showPersonCard(x, y, node.id, (int) (nodeHeight * sketch.zoomLevel));
+        sketch.sketchActivity.uiHandler.cardViewHandler.showCard(x, y, node.id, (int) (nodeHeight * sketch.zoomLevel));
+//        addChild(node.id);
         node.isActive = true;
     }
 
@@ -158,8 +166,8 @@ public class TreeHandler{
         }
 
         int verticalSpacingForChildren = (int) (totalChildWidth * 0.1 + nodeHeight * 1.5);
+//        int verticalSpacingForChildren = nodeHeight * 2;
         int childX = x - totalChildWidth / 2;
-
         for(SingleMemberWI child : dataPath.children) {
             int childWidth = calculateRootWidth(child);
             int ChildCenterX = childX + childWidth / 2;

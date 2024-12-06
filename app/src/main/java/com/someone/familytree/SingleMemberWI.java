@@ -5,8 +5,8 @@ import java.util.List;
 
 public class SingleMemberWI {
     public int id;
-    String name;
-    List<SingleMemberWI> children;
+    public String name;
+    public List<SingleMemberWI> children;
     int treeId;
 
     public SingleMemberWI(String name,int id, int treeId) {

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SketchActivity">
+    tools:context=".Sketch.SketchActivity">
 
     <FrameLayout
         android:id="@+id/sketchCanvas"
@@ -22,7 +22,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:id="@+id/addNewMember"
-        android:visibility="visible"
+        android:visibility="gone"
         android:text="@string/add_new_member"
         />
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -55,6 +55,7 @@
                     android:id="@+id/personName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="36dp"
                     android:singleLine="true"
                     android:text="askjdafskfjjafjjskafasfjhakjfsh"
                     android:textSize="18sp"
@@ -67,26 +68,16 @@
                     android:layout_marginTop="8dp"
                     android:text=""
                     android:textSize="16sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="vertical">
-
-                    <Button
-                        android:id="@+id/buttonAddChild"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/add_child" />
-
-                    <Button
-                        android:id="@+id/buttonAddParent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/add_parent" />
-                </LinearLayout>
             </LinearLayout>
+            <Button
+                android:id="@+id/editPerson"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="end"
+                android:background="@drawable/rounded_edit_square_24"
+                android:contentDescription="Edit Person"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp" />
         </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -96,7 +87,7 @@
         android:elevation="4dp"
         android:id="@+id/createMemberLayout"
         android:background="#77000000"
-        android:visibility="visible"
+        android:visibility="gone"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -185,4 +176,13 @@
         </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/personDetailContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,7 +25,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.someone.familytree.R;
-import com.someone.familytree.SketchActivity;
+import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
@@ -47,6 +47,10 @@ public class OfflineFragment extends Fragment {
         super();
         this.treeMenuActivity = treeMenuActivity;
         this.treeMenuActivity.offlineFragment = this;
+    }
+
+    public OfflineFragment() {
+        super();
     }
 
     @Override
@@ -301,7 +305,7 @@ public class OfflineFragment extends Fragment {
                             item.setTreeName(familyTreeTable.getTreeName());
                         }
                     }
-//                    itemAdapter.notifyDataSetChanged();
+                    refreshList();
                 });
             }).start();
         });
