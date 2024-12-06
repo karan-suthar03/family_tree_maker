@@ -26,14 +26,9 @@ public class AddNewMember {
         createNewMemberLayout = sketchActivity.findViewById(R.id.createMemberLayout);
         createNewMemberLayout.setVisibility(View.GONE);
     }
-
-    public void hide() {
-        sketchActivity.runOnUiThread(() -> createNewMemberLayout.setVisibility(View.GONE));
-    }
-
-    private void addNewParent(FamilyMember familyMember) {
+    public void addNewParent(FamilyMember familyMember) {
         if(createNewMemberLayout.getVisibility() == View.VISIBLE){
-            hide();
+            hideNewMemberLayout();
         }else{
             createNewMemberLayout.setVisibility(View.VISIBLE);
         }
@@ -51,10 +46,14 @@ public class AddNewMember {
                     FamilyMember newParent = new FamilyMember(memberName, parentId, sketchActivity.treeId);
                     int newParentId = (int) familyDatabase.familyDao().insertMember(newParent);
                     familyDatabase.familyDao().updateParentId(familyMember.getId(), newParentId, sketchActivity.treeId);
+                    FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(familyMember.getId());
                     TreeHandler.refreshTree();
                     sketchActivity.runOnUiThread(() -> {
                         name.setText("");
-                        hide();
+                        hideNewMemberLayout();
+                        if (uiHandler.personDetails.personDetailsContainer.getVisibility() == View.VISIBLE) {
+                            uiHandler.personDetails.showPersonDetails(updatedFamilyMember);
+                        }
                     });
                 });
                 thread.start();
@@ -87,7 +86,7 @@ public class AddNewMember {
                         name.setText("");
                         hideNewMemberLayout();
                         if(uiHandler.personDetails.personDetailsContainer.getVisibility() == View.VISIBLE){
-                            uiHandler.personDetails.updateChildrensList(id);
+                            uiHandler.personDetails.updateChildrenList(id);
                         }
                     });
                 });

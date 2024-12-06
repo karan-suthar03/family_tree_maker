@@ -83,9 +83,7 @@ public class OfflineFragment extends Fragment {
                 addTreeLayout.setVisibility(View.GONE);
                 editTreeLayout.setVisibility(View.GONE);
 
-                addTreeButton.setOnClickListener(v -> {
-                    showAddTreeDialog();
-                });
+                addTreeButton.setOnClickListener(v -> showAddTreeDialog());
 
                 LayoutInflater inflater1 = LayoutInflater.from(requireContext());
                 for (Item item : itemList) {
@@ -270,7 +268,6 @@ public class OfflineFragment extends Fragment {
         Button save = editTreeLayout.findViewById(R.id.editTreeButton);
 
         EditText treeNameET = editTreeLayout.findViewById(R.id.editTreeName);
-        EditText treeDescriptionET = editTreeLayout.findViewById(R.id.editTreeDescription);
 
         new Thread(() -> {
             String treeName = familyDatabase.familyDao().getTreeName(id);
@@ -288,7 +285,6 @@ public class OfflineFragment extends Fragment {
 
         save.setOnClickListener(v -> {
             String treeName = treeNameET.getText().toString().trim();
-            String treeDescription = treeDescriptionET.getText().toString().trim();
             if (treeName.isEmpty()) {
                 treeNameET.setError("Tree name cannot be empty");
                 return;
@@ -338,7 +334,7 @@ public class OfflineFragment extends Fragment {
         treeMenuActivity.itemsSelected(0, false, selectedItems);
     }
 
-    class SingleMember{
+    static class SingleMember{
         String Name;
         List<SingleMember> children;
         SingleMember(String name){
@@ -395,13 +391,6 @@ public class OfflineFragment extends Fragment {
         long id = familyDatabase.familyDao().insertMember(familyMember);
         for (SingleMember child : root.children) {
             duplicateMembers(child, (int) id, treeId);
-        }
-    }
-
-    private void printAll(SingleMember root) {
-        Log.d("TreeMenuActivity", root.Name);
-        for (SingleMember child : root.children) {
-            printAll(child);
         }
     }
 

@@ -40,7 +40,7 @@ public class SketchActivity extends AppCompatActivity {
 
         treeId = getIntent().getIntExtra("treeId", -1);
 
-        if(treeId == -1){
+        if (treeId == -1) {
             throw new IllegalArgumentException("TreeId is required");
         }
         fab = findViewById(R.id.addNewMember);
@@ -48,14 +48,14 @@ public class SketchActivity extends AppCompatActivity {
 
         findViewById(R.id.createMemberCancelButton).setOnClickListener(view -> uiHandler.addNewMember.hideNewMemberLayout());
 
-        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled */) {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 if (uiHandler.addNewMember.createNewMemberLayout.getVisibility() == View.VISIBLE) {
-                    uiHandler.addNewMember.hide();
-                } else if (uiHandler.personDetails.personDetailsContainer.getVisibility() == View.VISIBLE){
+                    uiHandler.addNewMember.hideNewMemberLayout();
+                } else if (uiHandler.personDetails.personDetailsContainer.getVisibility() == View.VISIBLE) {
                     uiHandler.personDetails.hidePersonDetails();
-                }else {
+                } else {
                     // Clean up resources
                     if (sketch != null) {
                         sketch.exit(); // Stop or dispose of the sketch
@@ -88,7 +88,7 @@ public class SketchActivity extends AppCompatActivity {
                 // Start the background thread to fetch data and update the sketch
                 Thread thread = new Thread(() -> {
                     loadFamilyData();
-                    sketch = new Sketch(canvasContainer.getWidth(), canvasContainer.getHeight(), rootWI,SketchActivity.this);
+                    sketch = new Sketch(canvasContainer.getWidth(), canvasContainer.getHeight(), rootWI, SketchActivity.this);
 
                     fragment = new PFragment(sketch);
                     fragment.setView(canvasContainer, SketchActivity.this);
@@ -97,6 +97,7 @@ public class SketchActivity extends AppCompatActivity {
             }
         });
     }
+
     private void loadFamilyData() {
         List<FamilyMember> familyMembers = familyDatabase.familyDao().getChildren(0, treeId);
         FamilyMember familyMember;
@@ -116,7 +117,7 @@ public class SketchActivity extends AppCompatActivity {
 
     private void convertToSingleMemberWI(SingleMemberWI parent, int id) {
         for (FamilyMember member : familyDatabase.familyDao().getChildren(id, treeId)) {
-            SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId(),treeId);
+            SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId(), treeId);
             parent.addChildren(child);
 
             convertToSingleMemberWI(child, member.getId());
