@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {FamilyMember.class, FamilyTreeTable.class}, version = 1)
+@Database(entities = {FamilyMember.class, FamilyTreeTable.class, MemberDetails.class}, version = 1)
 public abstract class FamilyDatabase extends RoomDatabase {
 
     private static volatile FamilyDatabase INSTANCE;

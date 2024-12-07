@@ -50,4 +50,10 @@ public interface FamilyDao {
 
     @Update
     void updateTree(FamilyTreeTable familyTreeTable);
+
+    @Query("SELECT * FROM member_details WHERE personId = :memberId AND treeId = :treeId")
+    List<MemberDetails> getMemberDetails(int memberId, int treeId);
+
+    @Insert
+    void insertMemberDetails(MemberDetails memberDetails);
 }

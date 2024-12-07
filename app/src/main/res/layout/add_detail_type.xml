@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="270dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    card_view:cardCornerRadius="16dp"
+    android:id="@+id/details_type_card"
+    card_view:cardElevation="8dp"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select detail type"
+            android:layout_marginTop="8dp"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/options_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/option_mobile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mobile Number" />
+
+            <RadioButton
+                android:id="@+id/option_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location" />
+
+            <RadioButton
+                android:id="@+id/option_age"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Current Age" />
+
+            <RadioButton
+                android:id="@+id/option_dob"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date of Birth" />
+
+            <RadioButton
+                android:id="@+id/option_dod"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date of Death" />
+
+            <RadioButton
+                android:id="@+id/option_custom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/circle_background"
+            android:text="Next" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

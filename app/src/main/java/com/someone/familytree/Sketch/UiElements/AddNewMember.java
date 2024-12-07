@@ -3,6 +3,7 @@ package com.someone.familytree.Sketch.UiElements;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.someone.familytree.Sketch.TreeHandler.familyDatabase;
 
+import android.app.Dialog;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -100,5 +101,4 @@ public class AddNewMember {
         InputMethodManager imm = (InputMethodManager) sketchActivity.getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(createNewMemberLayout.getWindowToken(), 0);
     }
-
 }

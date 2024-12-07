@@ -1,0 +1,7 @@
+<!-- res/values/styles.xml -->
+<resources>
+    <!-- Custom Transparent Dialog Style -->
+    <style name="CustomTransparentDialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+</resources>
