@@ -3,6 +3,7 @@ package com.someone.familytree.TreeMenu;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 import android.animation.ValueAnimator;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,9 +36,7 @@ import java.util.List;
 
 public class OfflineFragment extends Fragment {
     private final List<Item> itemList = new ArrayList<>();
-    ConstraintLayout addTreeLayout;
     TreeMenuActivity treeMenuActivity;
-    ConstraintLayout editTreeLayout;
     public List<Integer> selectedItems = new ArrayList<>();
     FamilyDatabase familyDatabase;
     LinearLayout listOfTrees;
@@ -75,13 +74,8 @@ public class OfflineFragment extends Fragment {
 
             ImageButton addTreeButton = view.findViewById(R.id.fab);
 
-            addTreeLayout = view.findViewById(R.id.addTreeLayout);
-            editTreeLayout = view.findViewById(R.id.editTreeLayout);
-
 
             new Handler(Looper.getMainLooper()).post(() -> {
-                addTreeLayout.setVisibility(View.GONE);
-                editTreeLayout.setVisibility(View.GONE);
 
                 addTreeButton.setOnClickListener(v -> showAddTreeDialog());
 
@@ -191,21 +185,11 @@ public class OfflineFragment extends Fragment {
     }
 
     private void showAddTreeDialog() {
-        if (addTreeLayout.getVisibility() == View.GONE) {
-            addTreeLayout.setVisibility(View.VISIBLE);
-        }
-
-        Button cancel = addTreeLayout.findViewById(R.id.createTreeCancelButton);
-        Button create = addTreeLayout.findViewById(R.id.addTreeButton);
-
-        cancel.setOnClickListener(v -> {
-            clearAddEditTexts();
-            create.setOnClickListener(null);
-            hideAddTreeDialog();
-        });
-
+        Dialog dialog = new Dialog(requireContext(), R.style.CustomTransparentDialog);
+        dialog.setContentView(R.layout.add_new_tree);
+        Button create = dialog.findViewById(R.id.addTreeButton);
         create.setOnClickListener(v -> {
-            EditText treeNameET = addTreeLayout.findViewById(R.id.treeName);
+            EditText treeNameET = dialog.findViewById(R.id.treeName);
             String treeName = treeNameET.getText().toString().trim();
             if (treeName.isEmpty()) {
                 treeNameET.setError("Tree name cannot be empty");
@@ -216,32 +200,14 @@ public class OfflineFragment extends Fragment {
                 long treeId = familyDatabase.familyDao().insertTree(familyTreeTable);
                 Log.d("TreeMenuActivity", "Tree id: " + treeId);
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    clearAddEditTexts();
                     itemList.add(new Item(familyTreeTable.getTreeName(), (int) treeId));
                     refreshList();
-                    hideAddTreeDialog();
+                    dialog.dismiss();
                 });
             }).start();
         });
-
-
+        dialog.show();
     }
-    private void clearAddEditTexts() {
-        EditText treeName = addTreeLayout.findViewById(R.id.treeName);
-        EditText treeDescription = addTreeLayout.findViewById(R.id.treeDescription);
-        treeName.setText("");
-        treeDescription.setText("");
-    }
-    private void hideAddTreeDialog() {
-        addTreeLayout.setVisibility(View.GONE);
-        addTreeLayout.findViewById(R.id.createTreeCancelButton).setOnClickListener(null);
-        addTreeLayout.findViewById(R.id.addTreeButton).setOnClickListener(null);
-        addTreeLayout.findViewById(R.id.treeName).clearFocus();
-        addTreeLayout.findViewById(R.id.treeDescription).clearFocus();
-        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(addTreeLayout.getWindowToken(), 0);
-    }
-
     public void deleteTree(List<Integer> ids) {
         new Thread(() -> {
             for(Integer id : ids){
@@ -260,30 +226,13 @@ public class OfflineFragment extends Fragment {
     }
 
     public void editTree(int id) {
-        if (editTreeLayout.getVisibility() == View.GONE) {
-            editTreeLayout.setVisibility(View.VISIBLE);
-        }
+        Dialog dialog = new Dialog(requireContext(), R.style.CustomTransparentDialog);
+        dialog.setContentView(R.layout.edit_tree);
 
-        Button cancel = editTreeLayout.findViewById(R.id.editTreeCancelButton);
-        Button save = editTreeLayout.findViewById(R.id.editTreeButton);
+        Button done = dialog.findViewById(R.id.saveTreeButton);
+        TextView treeNameET = dialog.findViewById(R.id.treeName);
 
-        EditText treeNameET = editTreeLayout.findViewById(R.id.editTreeName);
-
-        new Thread(() -> {
-            String treeName = familyDatabase.familyDao().getTreeName(id);
-            new Handler(Looper.getMainLooper()).post(() -> {
-                treeNameET.setText(treeName);
-//                treeDescriptionET.setText(familyTreeTable.getTreeDescription());
-            });
-        }).start();
-
-        cancel.setOnClickListener(v -> {
-            clearEditTexts();
-            save.setOnClickListener(null);
-            hideEditTreeDialog();
-        });
-
-        save.setOnClickListener(v -> {
+        done.setOnClickListener(v -> {
             String treeName = treeNameET.getText().toString().trim();
             if (treeName.isEmpty()) {
                 treeNameET.setError("Tree name cannot be empty");
@@ -294,34 +243,25 @@ public class OfflineFragment extends Fragment {
             new Thread(() -> {
                 familyDatabase.familyDao().updateTree(familyTreeTable);
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    clearEditTexts();
-                    hideEditTreeDialog();
                     for (Item item : itemList) {
                         if (item.getTreeId() == id) {
                             item.setTreeName(familyTreeTable.getTreeName());
                         }
                     }
                     refreshList();
+                    dialog.dismiss();
                 });
             }).start();
         });
-    }
 
-    private void clearEditTexts() {
-        EditText treeName = editTreeLayout.findViewById(R.id.editTreeName);
-        EditText treeDescription = editTreeLayout.findViewById(R.id.editTreeDescription);
-        treeName.setText("");
-        treeDescription.setText("");
-    }
+        new Thread(() -> {
+            String treeName = familyDatabase.familyDao().getTreeName(id);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                treeNameET.setText(treeName);
+            });
+        }).start();
 
-    private void hideEditTreeDialog() {
-        editTreeLayout.setVisibility(View.GONE);
-        editTreeLayout.findViewById(R.id.editTreeCancelButton).setOnClickListener(null);
-        editTreeLayout.findViewById(R.id.editTreeButton).setOnClickListener(null);
-        editTreeLayout.findViewById(R.id.editTreeName).clearFocus();
-        editTreeLayout.findViewById(R.id.editTreeDescription).clearFocus();
-        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(editTreeLayout.getWindowToken(),0);
+        dialog.show();
     }
 
     public void clearSelection() {

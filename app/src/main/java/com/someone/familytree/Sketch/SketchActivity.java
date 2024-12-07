@@ -46,25 +46,16 @@ public class SketchActivity extends AppCompatActivity {
         fab = findViewById(R.id.addNewMember);
         uiHandler = new UiHandler(this);
 
-        findViewById(R.id.createMemberCancelButton).setOnClickListener(view -> uiHandler.addNewMember.hideNewMemberLayout());
-
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (uiHandler.addNewMember.createNewMemberLayout.getVisibility() == View.VISIBLE) {
-                    uiHandler.addNewMember.hideNewMemberLayout();
-                } else if (uiHandler.personDetails.personDetailsContainer.getVisibility() == View.VISIBLE) {
-                    uiHandler.personDetails.hidePersonDetails();
-                } else {
-                    // Clean up resources
-                    if (sketch != null) {
-                        sketch.exit(); // Stop or dispose of the sketch
-                    }
-                    if (fragment != null) {
-                        fragment.dispose(); // Dispose of any resources related to the fragment
-                    }
-                    finish();
+                if (sketch != null) {
+                    sketch.exit(); // Stop or dispose of the sketch
                 }
+                if (fragment != null) {
+                    fragment.dispose(); // Dispose of any resources related to the fragment
+                }
+                finish();
             }
         };
 

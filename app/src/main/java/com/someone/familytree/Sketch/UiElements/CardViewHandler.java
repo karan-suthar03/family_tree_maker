@@ -35,7 +35,6 @@ public class CardViewHandler {
             constraintWidth = constraintLayout.getWidth();
             constraintHeight = constraintLayout.getHeight();
 
-            // Safe to hide the card now
             sketchActivity.runOnUiThread(() -> cardView.setVisibility(View.GONE));
         });
     }

@@ -4,21 +4,27 @@ import static com.someone.familytree.Sketch.TreeHandler.familyDatabase;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.os.Build;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowMetrics;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.database.FamilyMember;
@@ -30,34 +36,22 @@ public class PersonDetails {
 
     UiHandler uiHandler;
     SketchActivity sketchActivity;
-    public ConstraintLayout personDetailsContainer;
-    View personDetailsLayout;
+    BottomSheetDialog personDetailsLayout;
     public PersonDetails(UiHandler uiHandler) {
         this.uiHandler = uiHandler;
         this.sketchActivity = uiHandler.sketchActivity;
-        personDetailsContainer = sketchActivity.findViewById(R.id.personDetailContainer);
-        LayoutInflater inflater = sketchActivity.getLayoutInflater();
-
-        personDetailsLayout = inflater.inflate(R.layout.person_details, personDetailsContainer, false);
-        ImageButton closeDetails = personDetailsLayout.findViewById(R.id.backButton);
-        closeDetails.setOnClickListener(v -> personDetailsContainer.setVisibility(View.GONE));
-        personDetailsContainer.addView(personDetailsLayout);
-        personDetailsContainer.setVisibility(View.GONE);
-
-    }
-
-    public void hidePersonDetails() {
-        sketchActivity.runOnUiThread(() -> personDetailsContainer.setVisibility(View.GONE));
     }
 
     public void showPersonDetails(FamilyMember familyMember) {
+        personDetailsLayout = getBottomSheetDialog();
         LayoutInflater inflater = sketchActivity.getLayoutInflater();
-        View personDetailField = inflater.inflate(R.layout.person_detail_feilds, (ViewGroup) personDetailsLayout, false);
+        View personDetailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
         TextView heading = personDetailField.findViewById(R.id.FieldDetailHeading);
         heading.setText("Name:");
         TextView value = personDetailField.findViewById(R.id.FieldDetail);
         value.setText(familyMember.getName());
         LinearLayout personDetailList = personDetailsLayout.findViewById(R.id.PersonDetailsListLayout);
+        assert personDetailList != null;
         personDetailList.removeAllViews();
         personDetailList.addView(personDetailField);
         Log.d("ParentId", familyMember.getParentId() + "");
@@ -65,7 +59,7 @@ public class PersonDetails {
             if(familyMember.getParentId() != 0){
                 FamilyMember parent = familyDatabase.familyDao().getMember(familyMember.getParentId());
                 sketchActivity.runOnUiThread(()->{
-                    View parentDetailField = inflater.inflate(R.layout.person_detail_feilds, (ViewGroup) personDetailsLayout, false);
+                    View parentDetailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
                     TextView parentHeading = parentDetailField.findViewById(R.id.FieldDetailHeading);
                     parentHeading.setText("Parent:");
                     TextView parentValue = parentDetailField.findViewById(R.id.FieldDetail);
@@ -75,7 +69,7 @@ public class PersonDetails {
             }else {
                 Log.d("ParentId", "No Parent");
                 sketchActivity.runOnUiThread(()->{
-                    View addParentField = inflater.inflate(R.layout.add_parent_detail_item, (ViewGroup) personDetailsLayout, false);
+                    View addParentField = inflater.inflate(R.layout.add_parent_detail_item, null, false);
                     ImageButton addParentButton = addParentField.findViewById(R.id.addParent);
                     personDetailList.addView(addParentField);
                     addParentButton.setOnClickListener((v)-> uiHandler.addNewMember.addNewParent(familyMember));
@@ -85,7 +79,7 @@ public class PersonDetails {
             for(MemberDetails memberDetail: memberDetails){
                 sketchActivity.runOnUiThread(()->{
                     Log.d("Detail", memberDetail.getDetailName() + " " + memberDetail.getDetailValue());
-                    View detailField = inflater.inflate(R.layout.person_detail_feilds, (ViewGroup) personDetailsLayout, false);
+                    View detailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
                     TextView detailHeading = detailField.findViewById(R.id.FieldDetailHeading);
                     detailHeading.setText(memberDetail.getDetailName() + ":");
                     TextView detailValue = detailField.findViewById(R.id.FieldDetail);
@@ -97,14 +91,55 @@ public class PersonDetails {
         thread.start();
         View personChildrenLayout = personDetailsLayout.findViewById(R.id.PersonChildrenLayout);
         updateChildrenList(familyMember.getId());
+        assert personChildrenLayout != null;
         ImageButton addChildButton = personChildrenLayout.findViewById(R.id.addChildren);
-        addChildButton.setOnClickListener((v)->{
-            uiHandler.addNewMember.addNewChild(familyMember.getId());
-        });
-        personDetailsContainer.setVisibility(View.VISIBLE);
+        addChildButton.setOnClickListener((v)-> uiHandler.addNewMember.addNewChild(familyMember.getId()));
 
         ImageButton addDetailButton = personDetailsLayout.findViewById(R.id.addDetails);
+        assert addDetailButton != null;
         addDetailButton.setOnClickListener((v)-> addNewDetail(familyMember.getId()));
+
+        personDetailsLayout.show();
+    }
+
+    private @NonNull BottomSheetDialog getBottomSheetDialog() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(sketchActivity);
+        bottomSheetDialog.setContentView(R.layout.person_details);
+        bottomSheetDialog.setOnShowListener(dialog -> {
+            BottomSheetDialog bottomSheet = (BottomSheetDialog) dialog;
+            View bottomSheetInternal = bottomSheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+
+            if (bottomSheetInternal != null) {
+                BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheetInternal);
+
+                int screenHeight;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    WindowMetrics windowMetrics = sketchActivity.getWindowManager().getCurrentWindowMetrics();
+                    screenHeight = windowMetrics.getBounds().height();
+                } else {
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    sketchActivity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    screenHeight = displayMetrics.heightPixels;
+                }
+
+                int minHeight = (int) (screenHeight * 0.75);
+                bottomSheetInternal.setMinimumHeight(minHeight);
+
+                bottomSheetInternal.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                behavior.setPeekHeight(minHeight);
+
+                ScrollView scrollView = bottomSheetInternal.findViewById(R.id.scrollView);
+                if (scrollView != null) {
+                    scrollView.setOnTouchListener((v, event) -> {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            v.getParent().requestDisallowInterceptTouchEvent(v.getScrollY() != 0);
+                        }
+                        return false;
+                    });
+                }
+            }
+        });
+        return bottomSheetDialog;
     }
 
     private void addNewDetail(int id) {
@@ -297,11 +332,7 @@ public class PersonDetails {
             MemberDetails memberDetails = new MemberDetails(detailNameValue, string, sketchActivity.treeId, id, detailType);
             familyDatabase.familyDao().insertMemberDetails(memberDetails);
             FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(id);
-            sketchActivity.runOnUiThread(() -> {
-                if (uiHandler.personDetails.personDetailsContainer.getVisibility() == View.VISIBLE) {
-                    uiHandler.personDetails.showPersonDetails(updatedFamilyMember);
-                }
-            });
+            sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
         });
         thread.start();
     }
@@ -337,10 +368,73 @@ public class PersonDetails {
         return isValid;
     }
 
+    public void updatePersonalDetails(FamilyMember familyMember) {
+        if (personDetailsLayout == null || !personDetailsLayout.isShowing()) {
+            return;
+        }
+        LayoutInflater inflater = sketchActivity.getLayoutInflater();
+        View personDetailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
+        TextView heading = personDetailField.findViewById(R.id.FieldDetailHeading);
+        heading.setText("Name:");
+        TextView value = personDetailField.findViewById(R.id.FieldDetail);
+        value.setText(familyMember.getName());
+        LinearLayout personDetailList = personDetailsLayout.findViewById(R.id.PersonDetailsListLayout);
+        assert personDetailList != null;
+        personDetailList.removeAllViews();
+        personDetailList.addView(personDetailField);
+        Log.d("ParentId", familyMember.getParentId() + "");
+        Thread thread = new Thread(() -> {
+            if(familyMember.getParentId() != 0){
+                FamilyMember parent = familyDatabase.familyDao().getMember(familyMember.getParentId());
+                sketchActivity.runOnUiThread(()->{
+                    View parentDetailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
+                    TextView parentHeading = parentDetailField.findViewById(R.id.FieldDetailHeading);
+                    parentHeading.setText("Parent:");
+                    TextView parentValue = parentDetailField.findViewById(R.id.FieldDetail);
+                    parentValue.setText(parent.getName());
+                    personDetailList.addView(parentDetailField);
+                });
+            }else {
+                Log.d("ParentId", "No Parent");
+                sketchActivity.runOnUiThread(()->{
+                    View addParentField = inflater.inflate(R.layout.add_parent_detail_item, null, false);
+                    ImageButton addParentButton = addParentField.findViewById(R.id.addParent);
+                    personDetailList.addView(addParentField);
+                    addParentButton.setOnClickListener((v)-> uiHandler.addNewMember.addNewParent(familyMember));
+                });
+            }
+            List<MemberDetails> memberDetails = familyDatabase.familyDao().getMemberDetails(familyMember.getId(), sketchActivity.treeId);
+            for(MemberDetails memberDetail: memberDetails){
+                sketchActivity.runOnUiThread(()->{
+                    Log.d("Detail", memberDetail.getDetailName() + " " + memberDetail.getDetailValue());
+                    View detailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
+                    TextView detailHeading = detailField.findViewById(R.id.FieldDetailHeading);
+                    detailHeading.setText(memberDetail.getDetailName() + ":");
+                    TextView detailValue = detailField.findViewById(R.id.FieldDetail);
+                    detailValue.setText(memberDetail.getDetailValue());
+                    personDetailList.addView(detailField);
+                });
+            }
+        });
+        thread.start();
+        View personChildrenLayout = personDetailsLayout.findViewById(R.id.PersonChildrenLayout);
+        updateChildrenList(familyMember.getId());
+        assert personChildrenLayout != null;
+        ImageButton addChildButton = personChildrenLayout.findViewById(R.id.addChildren);
+        addChildButton.setOnClickListener((v)-> uiHandler.addNewMember.addNewChild(familyMember.getId()));
+
+        ImageButton addDetailButton = personDetailsLayout.findViewById(R.id.addDetails);
+        assert addDetailButton != null;
+        addDetailButton.setOnClickListener((v)-> addNewDetail(familyMember.getId()));
+
+        personDetailsLayout.show();
+    }
+
 
     public void updateChildrenList(int id) {
         LayoutInflater inflater = sketchActivity.getLayoutInflater();
         View personChildrenLayout = personDetailsLayout.findViewById(R.id.PersonChildrenLayout);
+        assert personChildrenLayout != null;
         LinearLayout childrenList = personChildrenLayout.findViewById(R.id.PersonChildrenListLayout);
         Thread thread1 = new Thread(() -> {
             List<FamilyMember> children = familyDatabase.familyDao().getChildren(id, sketchActivity.treeId);
@@ -348,10 +442,10 @@ public class PersonDetails {
                 if(!children.isEmpty()){
                     childrenList.removeAllViews();
                     for(FamilyMember child: children){
-                        View childDetailFeild = inflater.inflate(R.layout.child_detail_item, (ViewGroup) personDetailsLayout, false);
-                        TextView childHeading = childDetailFeild.findViewById(R.id.ChildName);
+                        View childDetailField = inflater.inflate(R.layout.child_detail_item, null, false);
+                        TextView childHeading = childDetailField.findViewById(R.id.ChildName);
                         childHeading.setText(child.getName());
-                        childrenList.addView(childDetailFeild);
+                        childrenList.addView(childDetailField);
                     }
                 }else{
                     childrenList.removeAllViews();
