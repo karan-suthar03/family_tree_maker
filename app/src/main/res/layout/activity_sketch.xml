@@ -38,6 +38,7 @@
             android:id="@+id/personCard"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
+            app:cardBackgroundColor="?attr/colorSecondary"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
             android:clickable="true"
@@ -56,6 +57,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="36dp"
+                    android:textColor="?attr/colorOnSecondary"
                     android:singleLine="true"
                     android:text="askjdafskfjjafjjskafasfjhakjfsh"
                     android:textSize="18sp"
@@ -66,15 +68,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text=""
+                    android:text="aksjasldkjaslkdjakjd"
                     android:textSize="16sp" />
             </LinearLayout>
-            <Button
+            <ImageButton
                 android:id="@+id/editPerson"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="end"
-                android:background="@drawable/rounded_edit_square_24"
+                android:background="#0FFF"
+                android:src="@drawable/rounded_edit_square_24"
+                android:tint="#4F4FFF"
                 android:contentDescription="Edit Person"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp" />

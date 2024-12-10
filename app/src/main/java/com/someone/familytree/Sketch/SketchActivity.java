@@ -24,7 +24,7 @@ public class SketchActivity extends AppCompatActivity {
 
     private SingleMemberWI rootWI;
     FamilyDatabase familyDatabase;
-    private Sketch sketch;
+    public Sketch sketch;
     PFragment fragment;
     public ExtendedFloatingActionButton fab;
 

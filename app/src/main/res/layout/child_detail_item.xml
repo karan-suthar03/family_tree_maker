@@ -4,35 +4,23 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/personChild"
+    android:paddingVertical="8dp"
     android:layout_marginVertical="3dp">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/ChildName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="28dp"
-            android:ellipsize="none"
-            android:inputType="textMultiLine"
-            android:scrollHorizontally="false"
-            android:text="Short tjaaskjfextxzcasffaf aexmple"
+            android:text="Child Name 1"
+            android:layout_marginStart="16dp"
             android:textSize="18sp"
-            android:layout_marginStart="6dp"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textColor="?attr/colorOnBackground"
+            android:layout_weight="1"/>
         <ImageButton
-            android:id="@+id/editDetail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_edit_24"
-            android:layout_marginStart="4dp"
-            android:contentDescription="Edit Person"
-            app:layout_constraintStart_toEndOf="@id/ChildName"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:id="@+id/goToPerson"
+            android:src="@drawable/rounded_arrow_outward_24"
+            android:contentDescription="Go to Child Details"
+            android:background="?attr/selectableItemBackground"
+            app:tint="?attr/colorSecondary" />
 </LinearLayout>

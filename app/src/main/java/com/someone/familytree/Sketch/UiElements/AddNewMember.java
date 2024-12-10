@@ -42,7 +42,7 @@ public class AddNewMember {
                     FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(familyMember.getId());
                     TreeHandler.refreshTree();
                     sketchActivity.runOnUiThread(() -> {
-                        uiHandler.personDetails.updatePersonalDetails(updatedFamilyMember);
+                        uiHandler.personDetails.showPersonDetails(updatedFamilyMember);
                     });
                     dialog.dismiss();
                 });
@@ -73,7 +73,7 @@ public class AddNewMember {
                         if(sketchActivity.fab.getVisibility() == View.VISIBLE){
                             sketchActivity.fab.setVisibility(View.GONE);
                         }
-                        uiHandler.personDetails.updatePersonalDetails(originalFamilyMember);
+                        uiHandler.personDetails.showPersonDetails(originalFamilyMember);
                     });
                 });
                 dialog.dismiss();

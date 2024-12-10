@@ -8,6 +8,7 @@ import android.widget.Button;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.TreeMenu.TreeMenuActivity;
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         Intent intent = new Intent(MainActivity.this, TreeMenuActivity.class);
         startActivity(intent);
 

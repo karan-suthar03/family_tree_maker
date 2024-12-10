@@ -18,6 +18,7 @@
             android:layout_width="0dp"
             android:scaleX="0.5"
             android:scaleY="0.5"
+            android:buttonTint="?attr/colorPrimary"
             android:button="@drawable/checked_checkbox"
             android:layout_height="match_parent"/>
         <LinearLayout

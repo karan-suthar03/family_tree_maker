@@ -33,8 +33,10 @@ public class TreeHandler{
         while (lineIterator.hasNext()) {
             PVector[] line = lineIterator.next();
             sketch.strokeWeight(strokeWeight);
-            sketch.stroke(255);
-            sketch.line(line[0].x, line[0].y + (float) TreeHandler.nodeHeight /2, line[1].x, line[1].y -  (float) TreeHandler.nodeHeight /2);
+            sketch.stroke(0);
+            PVector dist = PVector.sub(line[1], line[0]);
+            sketch.noFill();
+            sketch.bezier(line[0].x, line[0].y, line[0].x, line[0].y + dist.y / 2, line[1].x, line[1].y - dist.y / 2, line[1].x, line[1].y-nodeHeight/2);
         }
 
         Iterator<Node> nodeIterator = nodes.iterator();
@@ -86,6 +88,7 @@ public class TreeHandler{
         float y = (node.position.y + sketch.offsetY) * sketch.zoomLevel + (float) sketch.height / 2;
         sketch.sketchActivity.uiHandler.cardViewHandler.showCard(x, y, node.id, (int) (nodeHeight * sketch.zoomLevel));
 //        addChild(node.id);
+//        sketch.goToPerson(node.id);
         node.isActive = true;
     }
 
@@ -106,7 +109,7 @@ public class TreeHandler{
             convertToSingleMemberWI(rootWI, rootWI.id);
             TempNodes = new ArrayList<>();
             TempLines = new ArrayList<>();
-            calculatePositions(rootWI, 0, -sketch.height*2/5);
+            calculatePositions(rootWI, 0, 0);
             nodes = TempNodes;
             lines = TempLines;
         }
@@ -123,6 +126,15 @@ public class TreeHandler{
     public static void clear() {
         nodes = new ArrayList<>();
         lines = new ArrayList<>();
+    }
+
+    public static PVector getPersonPosition(int id) {
+        for (Node node : nodes) {
+            if (node.id == id) {
+                return node.position;
+            }
+        }
+        return null;
     }
 
     static class Node {

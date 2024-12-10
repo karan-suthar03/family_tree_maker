@@ -5,6 +5,7 @@ import static com.someone.familytree.Sketch.TreeHandler.familyDatabase;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
@@ -71,7 +72,7 @@ public class CardViewHandler {
             name.setText(familyMember.getName());
             TextView DOB = cardView.findViewById(R.id.personDob);
             DOB.setText("Unknown");
-            Button edit = cardView.findViewById(R.id.editPerson);
+            ImageButton edit = cardView.findViewById(R.id.editPerson);
             edit.setOnClickListener(v -> {
                 uiHandler.personDetails.showPersonDetails(familyMember);
                 hidePersonCard();

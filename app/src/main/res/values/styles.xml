@@ -1,5 +1,5 @@
 <resources>
-    <style name="CustomTransparentDialog" parent="Theme.Material3.DayNight.Dialog">
+    <style name="CustomTransparentDialog" parent="Theme.MaterialComponents.DayNight.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 </resources>

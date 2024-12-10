@@ -21,8 +21,23 @@ public class Sketch extends PApplet {
 
     float zoomLevel = 1;
 
+    boolean isFocusing = false;
+
+    boolean focusDone = true;
+
     float lastTouchDist = 0;
 
+    float focusFromX = 0;
+
+    float focusFromY = 0;
+
+    float focusToX = 0;
+
+    float focusToY = 0;
+
+    float deltaTime = 0L;
+
+    float lastTime = 0L;
 
     SketchActivity sketchActivity;
 
@@ -48,6 +63,11 @@ public class Sketch extends PApplet {
         TreeHandler.shadow.endDraw();
     }
 
+    private void calculateDeltaTime() {
+        deltaTime = (millis() - lastTime) / 1000f;
+        lastTime = millis();
+    }
+
     public void setup() {
         background(255);
         TreeHandler.refreshTree();
@@ -59,20 +79,27 @@ public class Sketch extends PApplet {
     }
 
     public void draw() {
-        background(25);
+
+
+        calculateDeltaTime();
+        if(isFocusing){
+            focusTo();
+        }
+
+        background(255);
         //draw grid
-        stroke(255, 50);
+        stroke(0, 50);
         strokeWeight(2);
-        for (int i = width/2; i < width; i += 100 * zoomLevel) {
+        for (int i = (int) ((float) width /2+(offsetX)*zoomLevel); i < width; i += (int) (100 * zoomLevel)) {
             line(i, 0, i, height);
         }
-        for (int i = width/2; i > 0; i -= 100 * zoomLevel) {
+        for (int i = (int) ((float) width /2+(offsetX)*zoomLevel); i > 0; i -= (int) (100 * zoomLevel)) {
             line(i, 0, i, height);
         }
-        for (int i = height/2; i < height; i += 100 * zoomLevel) {
+        for (int i = (int) ((float) height /2+(offsetY)*zoomLevel); i < height; i += (int) (100 * zoomLevel)) {
             line(0, i, width, i);
         }
-        for (int i = height/2; i > 0; i -= 100 * zoomLevel) {
+        for (int i = (int) ((float) height /2+(offsetY)*zoomLevel); i > 0; i -= (int) (100 * zoomLevel)) {
             line(0, i, width, i);
         }
 
@@ -80,6 +107,24 @@ public class Sketch extends PApplet {
         fill(0);
         text(frameRate, 100, 100);
         DrawTree();
+    }
+
+    private void focusTo() {
+        if (focusDone) {
+            isFocusing = false;
+            return;
+        }
+        float focusSpeed = deltaTime;
+        float diffX = focusToX - offsetX;
+        float diffY = focusToY - offsetY;
+        
+        if (abs(diffX) < 1 && abs(diffY) < 1) {
+            focusDone = true;
+            return;
+        }
+        offsetX += diffX * focusSpeed *5;
+        offsetY += diffY * focusSpeed *5;
+        TreeHandler.checkTouch(-focusToX,-focusToY);
     }
 
     private void DrawTree() {
@@ -103,6 +148,7 @@ public class Sketch extends PApplet {
             lastTouchDist = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
             isZooming = true;
         }
+        isFocusing = false;
         sketchActivity.uiHandler.cardViewHandler.hidePersonCard();
     }
 
@@ -166,5 +212,16 @@ public class Sketch extends PApplet {
         sketchActivity = null;
         TreeHandler.clear();
         super.onDestroy();
+    }
+
+    public void goToPerson(int id) {
+        focusFromX = offsetX;
+        focusFromY = offsetY;
+        PVector pos = TreeHandler.getPersonPosition(id);
+        assert pos != null;
+        focusToX = -pos.x;
+        focusToY = -pos.y;
+        isFocusing = true;
+        focusDone = false;
     }
 }

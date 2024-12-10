@@ -56,4 +56,7 @@ public interface FamilyDao {
 
     @Insert
     void insertMemberDetails(MemberDetails memberDetails);
+
+    @Update
+    void updateMemberDetails(MemberDetails memberDetail);
 }
