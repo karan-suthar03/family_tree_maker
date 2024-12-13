@@ -229,7 +229,7 @@ public class OfflineFragment extends Fragment {
         Dialog dialog = new Dialog(requireContext(), R.style.CustomTransparentDialog);
         dialog.setContentView(R.layout.edit_tree);
 
-        Button done = dialog.findViewById(R.id.saveTreeButton);
+        Button done = dialog.findViewById(R.id.addTreeButton);
         TextView treeNameET = dialog.findViewById(R.id.treeName);
 
         done.setOnClickListener(v -> {

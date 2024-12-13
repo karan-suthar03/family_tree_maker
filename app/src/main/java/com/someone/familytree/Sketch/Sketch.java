@@ -11,36 +11,22 @@ import processing.core.PVector;
 public class Sketch extends PApplet {
     int cHeight;
     int cWidth;
-
     float offsetX = 0;
     float offsetY = 0;
     boolean isDragging = false;
-
     float lastX = 0;
     float lastY = 0;
-
     float zoomLevel = 1;
-
     boolean isFocusing = false;
-
     boolean focusDone = true;
-
     float lastTouchDist = 0;
-
     float focusFromX = 0;
-
     float focusFromY = 0;
-
     float focusToX = 0;
-
     float focusToY = 0;
-
     float deltaTime = 0L;
-
     float lastTime = 0L;
-
     SketchActivity sketchActivity;
-
     boolean isZooming = false;
 
     PVector lastTouch1 = new PVector(0,0);

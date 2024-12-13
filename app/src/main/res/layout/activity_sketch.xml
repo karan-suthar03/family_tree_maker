@@ -67,21 +67,45 @@
                     android:singleLine="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="36dp"
                     android:layout_marginTop="8dp"
                     android:text="aksjasldkjaslkdjakjd"
                     android:textSize="16sp" />
             </LinearLayout>
-            <ImageButton
-                android:id="@+id/editPerson"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_gravity="end"
-                android:background="#0FFF"
-                android:src="@drawable/rounded_edit_square_24"
-                android:tint="#4F4FFF"
-                android:contentDescription="Edit Person"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp" />
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/editPerson"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginRight="16dp"
+                    android:background="#0FFF"
+                    android:contentDescription="Edit Person"
+                    android:src="@drawable/rounded_edit_square_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/colorPrimary" />
+
+                <ImageButton
+                    android:id="@+id/deleteButton"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="#0FFF"
+                    android:contentDescription="delete person"
+                    android:src="@drawable/rounded_delete_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/editPerson"
+                    app:tint="?attr/colorPrimary" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

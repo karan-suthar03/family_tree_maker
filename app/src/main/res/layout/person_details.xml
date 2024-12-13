@@ -62,9 +62,9 @@
                             android:layout_height="wrap_content"
                             android:src="@drawable/rounded_edit_24"
                             android:contentDescription="Edit Age"
-                            android:tint="?attr/colorSecondary"
                             android:background="?attr/selectableItemBackground"
-                            android:layout_marginStart="8dp"/>
+                            android:layout_marginStart="8dp"
+                            app:tint="?attr/colorSecondary" />
                     </LinearLayout>
 
                 </LinearLayout>

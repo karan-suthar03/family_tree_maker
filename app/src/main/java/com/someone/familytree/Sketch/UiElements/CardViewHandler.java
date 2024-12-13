@@ -15,6 +15,8 @@ import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.database.FamilyMember;
 
+import java.util.List;
+
 public class CardViewHandler {
     CardView cardView;
     ConstraintLayout constraintLayout;
@@ -42,6 +44,7 @@ public class CardViewHandler {
 
     public void showCard(float x, float y, int id, int nodeHeight) {
         FamilyMember familyMember = familyDatabase.familyDao().getMember(id);
+        List<FamilyMember> children = familyDatabase.familyDao().getChildren(id, sketchActivity.treeId);
 
         if (x + (float) cardWidth / 2 > constraintWidth) {
             x = constraintWidth - (float) cardWidth / 2;
@@ -77,6 +80,20 @@ public class CardViewHandler {
                 uiHandler.personDetails.showPersonDetails(familyMember);
                 hidePersonCard();
             });
+
+
+            ImageButton delete = cardView.findViewById(R.id.deleteButton);
+            if(children != null) {
+                if(!children.isEmpty()) {
+                    delete.setVisibility(View.GONE);
+                    return;
+                }
+            }
+            delete.setOnClickListener(v -> {
+                uiHandler.personDetails.deletePerson(familyMember);
+                hidePersonCard();
+            });
+            delete.setVisibility(View.VISIBLE);
         });
     }
 

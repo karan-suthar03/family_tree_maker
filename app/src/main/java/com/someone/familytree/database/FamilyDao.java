@@ -1,6 +1,7 @@
 package com.someone.familytree.database;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -59,4 +60,16 @@ public interface FamilyDao {
 
     @Update
     void updateMemberDetails(MemberDetails memberDetail);
+
+    @Update
+    void updateMember(FamilyMember familyMember);
+
+    @Delete
+    void deleteMemberDetails(MemberDetails memberDetails);
+
+    @Query("DELETE FROM member_details WHERE personId = :id AND treeId = :treeId")
+    void deleteMemberDetails(int id, int treeId);
+
+    @Delete
+    void deleteMember(FamilyMember familyMember);
 }

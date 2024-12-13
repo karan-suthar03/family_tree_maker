@@ -22,17 +22,24 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointBackward;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
+import com.someone.familytree.Sketch.TreeHandler;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.MemberDetails;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PersonDetails {
 
@@ -53,6 +60,32 @@ public class PersonDetails {
         TextView heading = personDetailField.findViewById(R.id.FieldDetailHeading);
         heading.setText("Name:");
         TextView value = personDetailField.findViewById(R.id.FieldDetail);
+        ImageButton editName = personDetailField.findViewById(R.id.editDetail);
+        editName.setImageDrawable(AppCompatResources.getDrawable(sketchActivity, R.drawable.rounded_edit_24));
+        editName.setOnClickListener(v -> {
+            Dialog dialog = new Dialog(sketchActivity, R.style.CustomTransparentDialog);
+            dialog.setContentView(R.layout.add_new_member);
+            EditText name = dialog.findViewById(R.id.editTextName);
+            name.setText(familyMember.getName());
+            Button createMember = dialog.findViewById(R.id.buttonSubmit);
+            createMember.setOnClickListener(v1 -> {
+                String memberName = name.getText().toString();
+                if(memberName.isEmpty()){
+                    name.setError("Name is required");
+                }else{
+                    Thread thread = new Thread(() -> {
+                        familyMember.setName(memberName);
+                        familyDatabase.familyDao().updateMember(familyMember);
+                        FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(familyMember.getId());
+                        sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
+                        TreeHandler.refreshTree();
+                    });
+                    thread.start();
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        });
         value.setText(familyMember.getName());
         LinearLayout personDetailList = personDetailsLayout.findViewById(R.id.PersonDetailsListLayout);
         assert personDetailList != null;
@@ -113,37 +146,142 @@ public class PersonDetails {
     }
 
     private void editMemberDetail(MemberDetails memberDetail) {
-        Dialog dialog = new Dialog(sketchActivity, R.style.CustomTransparentDialog);
-        dialog.setContentView(R.layout.add_detail);
-        TextView detailTitle = dialog.findViewById(R.id.title);
-        LinearLayout detailLayout = dialog.findViewById(R.id.detail_name_layout);
-        EditText detailValue = dialog.findViewById(R.id.detail_value);
-        EditText detailName = dialog.findViewById(R.id.detail_name);
-        detailTitle.setText("Edit Detail");
-        detailLayout.setVisibility(View.GONE);
-        detailValue.setVisibility(View.VISIBLE);
-        detailValue.setText(memberDetail.getDetailValue());
-        Button addDetail = dialog.findViewById(R.id.add_detail_button);
-        addDetail.setText("Update");
-        addDetail.setOnClickListener(v -> {
-            String detailValueValue = detailValue.getText().toString();
-            if(detailValueValue.isEmpty()){
-                detailValue.setError("Detail Value is required");
-                return;
-            }else{
-                if(validateDetail(memberDetail.getDetailName(), detailValueValue, memberDetail.getDetailType(), dialog)){
-                    memberDetail.setDetailValue(detailValueValue);
-                    Thread thread = new Thread(() -> {
-                        familyDatabase.familyDao().updateMemberDetails(memberDetail);
-                        FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(memberDetail.getPersonId());
-                        sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
-                    });
-                    thread.start();
-                }
+        if(memberDetail.getDetailType() == MemberDetails.DOB || memberDetail.getDetailType() == MemberDetails.DOD){
+// Using ExecutorService for more efficient background processing
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+            MaterialDatePicker<Long> picker = MaterialDatePicker.Builder.datePicker()
+                    .setCalendarConstraints(limitTodayOrBefore())
+                    .build();
+
+            picker.addOnPositiveButtonClickListener(selection -> {
+                String date = picker.getHeaderText();
+
+                executorService.execute(() -> {
+                    // Perform database operations in background
+                    memberDetail.setDetailValue(date);
+                    familyDatabase.familyDao().updateMemberDetails(memberDetail);
+                    FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(memberDetail.getPersonId());
+
+                    // Return to main thread to update UI
+                    sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
+                });
+            });
+
+            picker.show(sketchActivity.getSupportFragmentManager(), picker.toString());
+        }else{
+            Dialog dialog = new Dialog(sketchActivity, R.style.CustomTransparentDialog);
+            dialog.setContentView(R.layout.add_detail);
+            TextView detailTitle = dialog.findViewById(R.id.title);
+            LinearLayout detailLayout = dialog.findViewById(R.id.detail_name_layout);
+            EditText detailValue = dialog.findViewById(R.id.detail_value);
+            EditText detailName = dialog.findViewById(R.id.detail_name);
+            switch (memberDetail.getDetailType()){
+                case MemberDetails.MOBILE:
+                    detailTitle.setText("Edit Mobile Number");
+                    detailLayout.setVisibility(View.GONE);
+                    detailValue.setVisibility(View.VISIBLE);
+                    detailValue.setHint("Mobile Number");
+                    detailValue.setInputType(InputType.TYPE_CLASS_PHONE);
+                    break;
+                case MemberDetails.CURRENT_AGE:
+                    detailTitle.setText("Edit Current Age");
+                    detailLayout.setVisibility(View.GONE);
+                    detailValue.setVisibility(View.VISIBLE);
+                    detailValue.setHint("Current Age");
+                    detailValue.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    break;
+                case MemberDetails.LOCATION:
+                    detailTitle.setText("Edit Location");
+                    detailLayout.setVisibility(View.GONE);
+                    detailValue.setVisibility(View.VISIBLE);
+                    detailValue.setHint("Location");
+                    detailValue.setInputType(InputType.TYPE_CLASS_TEXT);
+                    break;
+                case MemberDetails.OCCUPATION:
+                    detailTitle.setText("Edit Occupation");
+                    detailLayout.setVisibility(View.GONE);
+                    detailValue.setVisibility(View.VISIBLE);
+                    detailValue.setHint("Occupation");
+                    detailValue.setInputType(InputType.TYPE_CLASS_TEXT);
+                    break;
+                case MemberDetails.DISCRIPTION:
+                    detailTitle.setText("Edit Description");
+                    detailLayout.setVisibility(View.GONE);
+                    detailValue.setVisibility(View.VISIBLE);
+                    detailValue.setHint("Description");
+                    detailValue.setInputType(InputType.TYPE_CLASS_TEXT);
+                    break;
+                case MemberDetails.CUSTOM_DETAIL:
+                    detailTitle.setText("Edit Detail");
+                    detailLayout.setVisibility(View.VISIBLE);
+                    detailName.setHint("Detail Name");
+                    detailName.setText(memberDetail.getDetailName());
+                    detailName.setInputType(InputType.TYPE_CLASS_TEXT);
+                    detailValue.setHint("Detail Value");
+                    detailValue.setInputType(InputType.TYPE_CLASS_TEXT);
+                    detailValue.setVisibility(View.VISIBLE);
+                    break;
             }
-            dialog.dismiss();
-        });
-        dialog.show();
+            detailValue.setText(memberDetail.getDetailValue());
+            Button addDetail = dialog.findViewById(R.id.add_detail_button);
+            addDetail.setOnClickListener(v -> {
+                String detailNameValue = "";
+                if(memberDetail.getDetailType() == MemberDetails.CUSTOM_DETAIL){
+                    detailNameValue = detailName.getText().toString();
+                    if(detailNameValue.isEmpty()){
+                        detailName.setError("Detail Name is required");
+                        return;
+                    }
+                }else{
+                    switch (memberDetail.getDetailType()){
+                        case MemberDetails.MOBILE:
+                            detailNameValue = "Mobile Number";
+                            break;
+                        case MemberDetails.CURRENT_AGE:
+                            detailNameValue = "Current Age";
+                            break;
+                        case MemberDetails.LOCATION:
+                            detailNameValue = "Location";
+                            break;
+                        case MemberDetails.OCCUPATION:
+                            detailNameValue = "Occupation";
+                            break;
+                        case MemberDetails.DISCRIPTION:
+                            detailNameValue = "Description";
+                            break;
+                    }
+                }
+                String detailValueValue = detailValue.getText().toString();
+                if(detailValueValue.isEmpty()){
+                    detailValue.setError("Detail Value is required");
+                    return;
+                }else{
+                    if(validateDetail(detailNameValue, detailValueValue, memberDetail.getDetailType(), dialog)){
+                        memberDetail.setDetailName(detailNameValue);
+                        memberDetail.setDetailValue(detailValueValue);
+                        Thread thread = new Thread(() -> {
+                            familyDatabase.familyDao().updateMemberDetails(memberDetail);
+                            FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(memberDetail.getPersonId());
+                            sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
+                        });
+                        thread.start();
+                    }
+                }
+                dialog.dismiss();
+            });
+            dialog.show();
+        }
+    }
+
+    @NonNull
+    private CalendarConstraints limitTodayOrBefore() {
+        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
+
+        // Set Validator to allow only today or before
+        constraintsBuilder.setValidator(DateValidatorPointBackward.now());
+
+        return constraintsBuilder.build();
     }
 
     private @NonNull BottomSheetDialog getBottomSheetDialog() {
@@ -367,7 +505,7 @@ public class PersonDetails {
         } else {
             detailName = "";
         }
-        return new DatePickerDialog(sketchActivity, (view, year, month, dayOfMonth) -> {
+        return new DatePickerDialog(sketchActivity,android.R.style.Theme_Holo_Dialog_NoActionBar, (view, year, month, dayOfMonth) -> {
             String date = dayOfMonth + "/" + (month + 1) + "/" + year;
             storeDetail(detailName, date, id, detailType);
         }, 2000, 0, 1);
@@ -445,5 +583,34 @@ public class PersonDetails {
             });
         });
         thread1.start();
+    }
+
+    public void deletePerson(FamilyMember familyMember) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(sketchActivity);
+        builder.setTitle("Delete");
+        builder.setMessage("Are you sure you want to delete this?");
+
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            Thread thread = new Thread(() -> {
+                familyDatabase.familyDao().deleteMember(familyMember.getId(), sketchActivity.treeId);
+                familyDatabase.familyDao().deleteMemberDetails(familyMember.getId(), sketchActivity.treeId);
+                FamilyMember parent = familyDatabase.familyDao().getMember(familyMember.getParentId());
+                if(parent != null){
+                    TreeHandler.refreshTree();
+                    uiHandler.cardViewHandler.hidePersonCard();
+                }else{
+                    sketchActivity.runOnUiThread(() -> sketchActivity.showAddMemberOption());
+                }
+            });
+            thread.start();
+        });
+
+        builder.setNegativeButton("No", (dialog, which) -> {
+            // Dismiss the dialog
+            dialog.dismiss();
+        });
+
+        Dialog dialog = builder.create();
+        dialog.show();
     }
 }
