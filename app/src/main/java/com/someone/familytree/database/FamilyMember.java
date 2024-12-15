@@ -8,6 +8,8 @@ public class FamilyMember {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
+    private String myUid;
+    private String personUid;
     private int parentId;
     private int treeId;
 
@@ -48,5 +50,21 @@ public class FamilyMember {
 
     public void setTreeId(int treeId) {
         this.treeId = treeId;
+    }
+
+    public String getMyUid() {
+        return myUid;
+    }
+
+    public void setMyUid(String myUid) {
+        this.myUid = myUid;
+    }
+
+    public String getPersonUid() {
+        return personUid;
+    }
+
+    public void setPersonUid(String personUid) {
+        this.personUid = personUid;
     }
 }

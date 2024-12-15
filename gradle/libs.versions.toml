@@ -11,6 +11,9 @@ constraintlayout = "2.2.0"
 materialVersion = "<latest-version>"
 realmAndroidLibrary = "10.15.1"
 roomRuntime = "2.6.1"
+googleGmsGoogleServices = "4.4.2"
+firebaseAuth = "23.1.0"
+firebaseDatabase = "21.0.0"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -25,7 +28,10 @@ material-vlatestversion = { module = "com.google.android.material:material", ver
 realm-android-library = { module = "io.realm:realm-android-library", version.ref = "realmAndroidLibrary" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 

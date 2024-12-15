@@ -8,6 +8,8 @@ import androidx.room.PrimaryKey;
 public class MemberDetails {
     @PrimaryKey(autoGenerate = true)
     private int id;
+    private String myUid;
+    private String personUid;
     private String detailName;
     private String detailValue;
     private int personId;
@@ -76,5 +78,21 @@ public class MemberDetails {
 
     public void setDetailType(int detailType) {
         this.detailType = detailType;
+    }
+
+    public String getMyUid() {
+        return myUid;
+    }
+
+    public void setMyUid(String myUid) {
+        this.myUid = myUid;
+    }
+
+    public String getPersonUid() {
+        return personUid;
+    }
+
+    public void setPersonUid(String personUid) {
+        this.personUid = personUid;
     }
 }

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -8,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.someone.familytree"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -37,6 +38,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.room.runtime)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
     annotationProcessor(libs.room.compiler)
     implementation(libs.gson)
     implementation(libs.material.vlatestversion)

@@ -1,7 +1,5 @@
 package com.someone.familytree.Sketch.UiElements;
 
-import static com.someone.familytree.Sketch.TreeHandler.familyDatabase;
-
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
+import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 
 import java.util.List;
@@ -43,8 +42,8 @@ public class CardViewHandler {
     }
 
     public void showCard(float x, float y, int id, int nodeHeight) {
-        FamilyMember familyMember = familyDatabase.familyDao().getMember(id);
-        List<FamilyMember> children = familyDatabase.familyDao().getChildren(id, sketchActivity.treeId);
+        FamilyMember familyMember = DatabaseManager.getMember(id);
+        List<FamilyMember> children = DatabaseManager.getChildren(id, sketchActivity.treeId);
 
         if (x + (float) cardWidth / 2 > constraintWidth) {
             x = constraintWidth - (float) cardWidth / 2;

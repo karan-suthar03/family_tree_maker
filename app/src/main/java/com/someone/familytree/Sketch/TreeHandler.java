@@ -1,7 +1,7 @@
 package com.someone.familytree.Sketch;
 
 import com.someone.familytree.SingleMemberWI;
-import com.someone.familytree.database.FamilyDatabase;
+import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 
 import java.util.ArrayList;
@@ -21,7 +21,6 @@ public class TreeHandler{
     static int nodeHeight = 50;
     static ArrayList<PVector[]> lines = new ArrayList<>();
     static ArrayList<PVector[]> TempLines = new ArrayList<>();
-    public static FamilyDatabase familyDatabase;
     static float nodeWidth = 100;
     static public PGraphics shadow;
 
@@ -95,16 +94,16 @@ public class TreeHandler{
     static void addChild(int id) {
         String name = "New Child";
         FamilyMember familyMember = new FamilyMember(name, id, sketch.sketchActivity.treeId);
-        familyDatabase.familyDao().insertMember(familyMember);
+        DatabaseManager.insertMember(familyMember);
         refreshTree();
     }
 
     public static void refreshTree() {
-        List<FamilyMember> familyMembers = familyDatabase.familyDao().getChildren(0,sketch.sketchActivity.treeId);
+        List<FamilyMember> familyMembers = DatabaseManager.getChildren(0,sketch.sketchActivity.treeId);
         if (familyMembers.isEmpty()) {
             sketch.sketchActivity.showAddMemberOption();
         }else{
-            FamilyMember familyMember = familyDatabase.familyDao().getChildren(0,sketch.sketchActivity.treeId).get(0);
+            FamilyMember familyMember = DatabaseManager.getChildren(0,sketch.sketchActivity.treeId).get(0);
             rootWI = new SingleMemberWI(familyMember.getName(), familyMember.getId(),sketch.sketchActivity.treeId);
             convertToSingleMemberWI(rootWI, rootWI.id);
             TempNodes = new ArrayList<>();
@@ -116,7 +115,7 @@ public class TreeHandler{
     }
 
     private static void convertToSingleMemberWI(SingleMemberWI parent, int id) {
-        for (FamilyMember member : familyDatabase.familyDao().getChildren(id,sketch.sketchActivity.treeId)) {
+        for (FamilyMember member : DatabaseManager.getChildren(id,sketch.sketchActivity.treeId)) {
             SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId(),sketch.sketchActivity.treeId);
             parent.addChildren(child);
             convertToSingleMemberWI(child, member.getId());

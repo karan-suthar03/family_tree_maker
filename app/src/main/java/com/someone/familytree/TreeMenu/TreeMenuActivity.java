@@ -19,7 +19,7 @@ import com.someone.familytree.R;
 import java.util.List;
 
 public class TreeMenuActivity extends AppCompatActivity {
-    public OfflineFragment offlineFragment;
+    public PrivateFragment privateFragment;
     Fragment currentFragment;
     int selected = 0;
 
@@ -52,9 +52,9 @@ public class TreeMenuActivity extends AppCompatActivity {
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
-                tab.setText("Offline");
+                tab.setText("Private");
             } else {
-                tab.setText("Online");
+                tab.setText("Public");
             }
         }
         ).attach();
@@ -85,12 +85,12 @@ public class TreeMenuActivity extends AppCompatActivity {
             selectedCount.setText(selected+"");
             ImageButton unselectButton = selectedToolbarLayout.findViewById(R.id.unselectButton);
             unselectButton.setOnClickListener(v -> {
-                offlineFragment.clearSelection();
+                privateFragment.clearSelection();
                 selectedToolbarLayout.setVisibility(View.GONE);
             });
             ImageButton deleteButton = selectedToolbarLayout.findViewById(R.id.deleteButton);
             deleteButton.setOnClickListener(v -> {
-                offlineFragment.deleteTree(itemList);
+                privateFragment.deleteTree(itemList);
 //                itemAdapter.clearSelection();
                 selectedToolbarLayout.setVisibility(View.GONE);
             });
@@ -109,19 +109,18 @@ public class TreeMenuActivity extends AppCompatActivity {
                     if(item.getItemId() == R.id.edit) {
                         Log.d("TreeMenuActivity", "Edit clicked");
                         int id = itemList.get(0);
-                        offlineFragment.editTree(id);
+                        privateFragment.editTree(id);
                         selectedToolbarLayout.setVisibility(View.GONE);
                         return true;
                     }else if (item.getItemId() == R.id.duplicate) {
                         Log.d("TreeMenuActivity", "Delete clicked");
-                        offlineFragment.duplicate(itemList);
+                        privateFragment.duplicate(itemList);
                         selectedToolbarLayout.setVisibility(View.GONE);
                         return true;
                     }
                     return false;
                 });
             });
-
         }else{
             hideSelectedToolbar();
         }

@@ -3,15 +3,14 @@ package com.someone.familytree;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.TreeMenu.TreeMenuActivity;
+import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
@@ -155,10 +154,10 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        Intent intent = new Intent(MainActivity.this, TreeMenuActivity.class);
+        Intent intent = new Intent(MainActivity.this, Authentication.class);
         startActivity(intent);
-
         finish();
+
 
 //        familyDatabase = FamilyDatabase.getDatabase(this);
 //        Thread thread = getThread();
@@ -187,13 +186,13 @@ public class MainActivity extends AppCompatActivity {
             convertToSingleMemberWI(rootWI, rootId, treeId);
 
             printAllMembers(treeId);
-            Button button = findViewById(R.id.button);
-            button.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, SketchActivity.class);
-                // put extra tree id
-                intent.putExtra("treeId", treeId);
-                startActivity(intent);
-            });
+//            Button button = findViewById(R.id.button);
+//            button.setOnClickListener(v -> {
+//                Intent intent = new Intent(MainActivity.this, SketchActivity.class);
+//                // put extra tree id
+//                intent.putExtra("treeId", treeId);
+//                startActivity(intent);
+//            });
         });
     }
 

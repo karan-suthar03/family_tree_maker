@@ -1,5 +1,6 @@
 package com.someone.familytree.database;
 
+import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,6 +9,7 @@ public class FamilyTreeTable {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String treeName;
+    private String Uid;
 
     public FamilyTreeTable(String treeName) {
         this.treeName = treeName;
@@ -28,4 +30,13 @@ public class FamilyTreeTable {
     public void setTreeName(String TreeName) {
         this.treeName = TreeName;
     }
+
+    public String getUid() {
+        return Uid;
+    }
+
+    public void setUid(String Uid) {
+        this.Uid = Uid;
+    }
+
 }

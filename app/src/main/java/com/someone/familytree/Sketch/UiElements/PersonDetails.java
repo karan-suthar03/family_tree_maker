@@ -1,7 +1,5 @@
 package com.someone.familytree.Sketch.UiElements;
 
-import static com.someone.familytree.Sketch.TreeHandler.familyDatabase;
-
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Build;
@@ -34,6 +32,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.Sketch.TreeHandler;
+import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.MemberDetails;
 
@@ -75,8 +74,8 @@ public class PersonDetails {
                 }else{
                     Thread thread = new Thread(() -> {
                         familyMember.setName(memberName);
-                        familyDatabase.familyDao().updateMember(familyMember);
-                        FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(familyMember.getId());
+                        DatabaseManager.updateMember(familyMember);
+                        FamilyMember updatedFamilyMember = DatabaseManager.getMember(familyMember.getId());
                         sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
                         TreeHandler.refreshTree();
                     });
@@ -94,7 +93,7 @@ public class PersonDetails {
         Log.d("ParentId", familyMember.getParentId() + "");
         Thread thread = new Thread(() -> {
             if(familyMember.getParentId() != 0){
-                FamilyMember parent = familyDatabase.familyDao().getMember(familyMember.getParentId());
+                FamilyMember parent = DatabaseManager.getMember(familyMember.getParentId());
                 sketchActivity.runOnUiThread(()->{
                     View parentDetailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
                     TextView parentHeading = parentDetailField.findViewById(R.id.FieldDetailHeading);
@@ -118,7 +117,7 @@ public class PersonDetails {
                     addParentButton.setOnClickListener((v)-> uiHandler.addNewMember.addNewParent(familyMember));
                 });
             }
-            List<MemberDetails> memberDetails = familyDatabase.familyDao().getMemberDetails(familyMember.getId(), sketchActivity.treeId);
+            List<MemberDetails> memberDetails = DatabaseManager.getMemberDetails(familyMember.getId(), sketchActivity.treeId);
             for(MemberDetails memberDetail: memberDetails){
                 sketchActivity.runOnUiThread(()->{
                     View detailField = inflater.inflate(R.layout.person_detail_feilds, null, false);
@@ -160,8 +159,8 @@ public class PersonDetails {
                 executorService.execute(() -> {
                     // Perform database operations in background
                     memberDetail.setDetailValue(date);
-                    familyDatabase.familyDao().updateMemberDetails(memberDetail);
-                    FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(memberDetail.getPersonId());
+                    DatabaseManager.updateMemberDetails(memberDetail);
+                    FamilyMember updatedFamilyMember = DatabaseManager.getMember(memberDetail.getPersonId());
 
                     // Return to main thread to update UI
                     sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
@@ -261,8 +260,8 @@ public class PersonDetails {
                         memberDetail.setDetailName(detailNameValue);
                         memberDetail.setDetailValue(detailValueValue);
                         Thread thread = new Thread(() -> {
-                            familyDatabase.familyDao().updateMemberDetails(memberDetail);
-                            FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(memberDetail.getPersonId());
+                            DatabaseManager.updateMemberDetails(memberDetail);
+                            FamilyMember updatedFamilyMember = DatabaseManager.getMember(memberDetail.getPersonId());
                             sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
                         });
                         thread.start();
@@ -330,7 +329,7 @@ public class PersonDetails {
         Button addDetail = dialog.findViewById(R.id.next_button);
         RadioGroup radioGroup = dialog.findViewById(R.id.options_group);
         Thread thread = new Thread(() -> {
-            List<MemberDetails> memberDetails = familyDatabase.familyDao().getMemberDetails(id, sketchActivity.treeId);
+            List<MemberDetails> memberDetails = DatabaseManager.getMemberDetails(id, sketchActivity.treeId);
             for (MemberDetails memberDetail : memberDetails) {
                 if (memberDetail.getDetailType() == MemberDetails.DOB) {
                     radioGroup.findViewById(R.id.option_dob).setVisibility(View.GONE);
@@ -515,8 +514,8 @@ public class PersonDetails {
         Log.d("Detail", detailNameValue + " " + string + " " + id + " " + detailType);
         Thread thread = new Thread(() -> {
             MemberDetails memberDetails = new MemberDetails(detailNameValue, string, sketchActivity.treeId, id, detailType);
-            familyDatabase.familyDao().insertMemberDetails(memberDetails);
-            FamilyMember updatedFamilyMember = familyDatabase.familyDao().getMember(id);
+            DatabaseManager.insertMemberDetails(memberDetails);
+            FamilyMember updatedFamilyMember = DatabaseManager.getMember(id);
             sketchActivity.runOnUiThread(() -> showPersonDetails(updatedFamilyMember));
         });
         thread.start();
@@ -559,7 +558,7 @@ public class PersonDetails {
         LinearLayout childrenList = personDetailsLayout.findViewById(R.id.PersonChildrenLayout);
         assert childrenList != null;
         Thread thread1 = new Thread(() -> {
-            List<FamilyMember> children = familyDatabase.familyDao().getChildren(id, sketchActivity.treeId);
+            List<FamilyMember> children = DatabaseManager.getChildren(id, sketchActivity.treeId);
             sketchActivity.runOnUiThread(()->{
                 if(!children.isEmpty()){
                     childrenList.removeAllViews();
@@ -592,9 +591,9 @@ public class PersonDetails {
 
         builder.setPositiveButton("Yes", (dialog, which) -> {
             Thread thread = new Thread(() -> {
-                familyDatabase.familyDao().deleteMember(familyMember.getId(), sketchActivity.treeId);
-                familyDatabase.familyDao().deleteMemberDetails(familyMember.getId(), sketchActivity.treeId);
-                FamilyMember parent = familyDatabase.familyDao().getMember(familyMember.getParentId());
+                DatabaseManager.deleteMember(familyMember.getId(), sketchActivity.treeId);
+                DatabaseManager.deleteMemberDetails(familyMember.getId(), sketchActivity.treeId);
+                FamilyMember parent = DatabaseManager.getMember(familyMember.getParentId());
                 if(parent != null){
                     TreeHandler.refreshTree();
                     uiHandler.cardViewHandler.hidePersonCard();

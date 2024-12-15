@@ -12,10 +12,10 @@ import java.util.List;
 public interface FamilyDao {
     // Insert and return the generated ID
     @Insert
-    long insertMember(FamilyMember member); // Returns long for generated ID
+    long insertMember(FamilyMember member);
 
     @Insert
-    long insertTree(FamilyTreeTable tree); // Returns long for generated ID
+    long insertTree(FamilyTreeTable tree);
 
     // Get all family trees
     @Query("SELECT * FROM family_tree")
@@ -72,4 +72,7 @@ public interface FamilyDao {
 
     @Delete
     void deleteMember(FamilyMember familyMember);
+
+    @Query("SELECT * FROM family_tree_members WHERE personUid = :personUid AND treeId = :treeId")
+    FamilyMember getMemberByUid(String personUid, int treeId);
 }

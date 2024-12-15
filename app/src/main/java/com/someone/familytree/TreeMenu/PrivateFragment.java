@@ -1,7 +1,5 @@
 package com.someone.familytree.TreeMenu;
 
-import static android.content.Context.INPUT_METHOD_SERVICE;
-
 import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
@@ -13,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -21,34 +18,32 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
-import com.someone.familytree.database.FamilyDatabase;
+import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OfflineFragment extends Fragment {
+public class PrivateFragment extends Fragment {
     private final List<Item> itemList = new ArrayList<>();
     TreeMenuActivity treeMenuActivity;
     public List<Integer> selectedItems = new ArrayList<>();
-    FamilyDatabase familyDatabase;
     LinearLayout listOfTrees;
     View view;
 
-    public OfflineFragment(TreeMenuActivity treeMenuActivity) {
+    public PrivateFragment(TreeMenuActivity treeMenuActivity) {
         super();
         this.treeMenuActivity = treeMenuActivity;
-        this.treeMenuActivity.offlineFragment = this;
+        this.treeMenuActivity.privateFragment = this;
     }
 
-    public OfflineFragment() {
+    public PrivateFragment() {
         super();
     }
 
@@ -57,7 +52,6 @@ public class OfflineFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_tree_menu, container, false);
         this.view = view;
         listOfTrees = view.findViewById(R.id.listOfTrees);
-        familyDatabase = FamilyDatabase.getDatabase(requireContext());
 
         generateList();
 
@@ -66,7 +60,11 @@ public class OfflineFragment extends Fragment {
 
     private void generateList() {
         new Thread(() -> {
-            List<FamilyTreeTable> familyTreeTableList = familyDatabase.familyDao().getAllTrees();
+            List<FamilyTreeTable> familyTreeTableList = DatabaseManager.getAllTrees();
+
+            if (familyTreeTableList == null) {
+                return;
+            }
 
             for (FamilyTreeTable familyTreeTable : familyTreeTableList) {
                 itemList.add(new Item(familyTreeTable.getTreeName(), familyTreeTable.getId()));
@@ -197,7 +195,7 @@ public class OfflineFragment extends Fragment {
             }
             FamilyTreeTable familyTreeTable = new FamilyTreeTable(treeName);
             new Thread(() -> {
-                long treeId = familyDatabase.familyDao().insertTree(familyTreeTable);
+                long treeId = DatabaseManager.insertTree(familyTreeTable);
                 Log.d("TreeMenuActivity", "Tree id: " + treeId);
                 new Handler(Looper.getMainLooper()).post(() -> {
                     itemList.add(new Item(familyTreeTable.getTreeName(), (int) treeId));
@@ -211,8 +209,8 @@ public class OfflineFragment extends Fragment {
     public void deleteTree(List<Integer> ids) {
         new Thread(() -> {
             for(Integer id : ids){
-                familyDatabase.familyDao().deleteTree(id);
-                familyDatabase.familyDao().deleteAll(id);
+                DatabaseManager.deleteTree(id);
+                DatabaseManager.deleteAllMembers(id);
             }
             new Handler(Looper.getMainLooper()).post(this::refreshList);
         }).start();
@@ -241,7 +239,7 @@ public class OfflineFragment extends Fragment {
             FamilyTreeTable familyTreeTable = new FamilyTreeTable(treeName);
             familyTreeTable.setId(id);
             new Thread(() -> {
-                familyDatabase.familyDao().updateTree(familyTreeTable);
+                DatabaseManager.updateTree(familyTreeTable);
                 new Handler(Looper.getMainLooper()).post(() -> {
                     for (Item item : itemList) {
                         if (item.getTreeId() == id) {
@@ -255,7 +253,7 @@ public class OfflineFragment extends Fragment {
         });
 
         new Thread(() -> {
-            String treeName = familyDatabase.familyDao().getTreeName(id);
+            String treeName = DatabaseManager.getTreeName(id);
             new Handler(Looper.getMainLooper()).post(() -> {
                 treeNameET.setText(treeName);
             });
@@ -289,11 +287,11 @@ public class OfflineFragment extends Fragment {
     public void duplicate(List<Integer> ids) {
         new Thread(() -> {
             for (Integer id : ids) {
-                String newName = familyDatabase.familyDao().getTreeName(id) + " (Copy)";
+                String newName = DatabaseManager.getTreeName(id);
                 newName = checkDuplicateName(newName);
                 FamilyTreeTable familyTreeTable = new FamilyTreeTable(newName);
-                int treeId = (int) familyDatabase.familyDao().insertTree(familyTreeTable);
-                List<FamilyMember> familyMembers = familyDatabase.familyDao().getChildren(0, id);
+                int treeId = (int) DatabaseManager.insertTree(familyTreeTable);
+                List<FamilyMember> familyMembers = DatabaseManager.getChildren(0, id);
                 if (!familyMembers.isEmpty()) {
                     FamilyMember familyMember = familyMembers.get(0);
                     SingleMember root = new SingleMember(familyMember.getName());
@@ -306,7 +304,7 @@ public class OfflineFragment extends Fragment {
     }
 
     private String checkDuplicateName(String newName) {
-        List<FamilyTreeTable> familyTreeTables = familyDatabase.familyDao().getAllTrees();
+        List<FamilyTreeTable> familyTreeTables = DatabaseManager.getAllTrees();
         int i = 1;
         String tempName = newName;
         while (true) {
@@ -328,14 +326,14 @@ public class OfflineFragment extends Fragment {
 
     private void duplicateMembers(SingleMember root, int i, int treeId) {
         FamilyMember familyMember = new FamilyMember(root.Name, i, treeId);
-        long id = familyDatabase.familyDao().insertMember(familyMember);
+        long id = DatabaseManager.insertMember(familyMember);
         for (SingleMember child : root.children) {
             duplicateMembers(child, (int) id, treeId);
         }
     }
 
     private void convertToSingleMember(SingleMember root, int id, int treeId) {
-        for (FamilyMember member : familyDatabase.familyDao().getChildren(id, treeId)) {
+        for (FamilyMember member : DatabaseManager.getChildren(id, treeId)) {
             SingleMember child = new SingleMember(member.getName());
             root.addChildren(child);
             convertToSingleMember(child, member.getId(), treeId);

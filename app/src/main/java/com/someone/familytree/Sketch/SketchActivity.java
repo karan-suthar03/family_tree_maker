@@ -13,7 +13,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.someone.familytree.R;
 import com.someone.familytree.SingleMemberWI;
 import com.someone.familytree.Sketch.UiElements.UiHandler;
-import com.someone.familytree.database.FamilyDatabase;
+import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 
 import java.util.List;
@@ -23,7 +23,6 @@ import processing.android.PFragment;
 public class SketchActivity extends AppCompatActivity {
 
     private SingleMemberWI rootWI;
-    FamilyDatabase familyDatabase;
     public Sketch sketch;
     PFragment fragment;
     public ExtendedFloatingActionButton fab;
@@ -70,10 +69,6 @@ public class SketchActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 // Remove the listener after the layout is ready
                 canvasContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                // Initialize the family database and the sketch
-                familyDatabase = FamilyDatabase.getDatabase(SketchActivity.this);
-                TreeHandler.familyDatabase = familyDatabase;
                 fab.setVisibility(View.GONE);
 
                 // Start the background thread to fetch data and update the sketch
@@ -90,7 +85,7 @@ public class SketchActivity extends AppCompatActivity {
     }
 
     private void loadFamilyData() {
-        List<FamilyMember> familyMembers = familyDatabase.familyDao().getChildren(0, treeId);
+        List<FamilyMember> familyMembers = DatabaseManager.getChildren(0, treeId);
         FamilyMember familyMember;
         if (!familyMembers.isEmpty()) {
             familyMember = familyMembers.get(0);
@@ -107,7 +102,7 @@ public class SketchActivity extends AppCompatActivity {
     }
 
     private void convertToSingleMemberWI(SingleMemberWI parent, int id) {
-        for (FamilyMember member : familyDatabase.familyDao().getChildren(id, treeId)) {
+        for (FamilyMember member : DatabaseManager.getChildren(id, treeId)) {
             SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId(), treeId);
             parent.addChildren(child);
 

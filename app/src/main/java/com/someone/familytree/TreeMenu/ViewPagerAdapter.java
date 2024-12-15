@@ -1,9 +1,7 @@
 package com.someone.familytree.TreeMenu;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
@@ -21,7 +19,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         if (position == 1) {
             return new OnlineFragment(treeMenuActivity);
         }
-        return new OfflineFragment(treeMenuActivity);
+        return new PrivateFragment(treeMenuActivity);
     }
 
     @Override

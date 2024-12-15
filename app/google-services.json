@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "571514401679",
+    "firebase_url": "https://something-528fe-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "something-528fe",
+    "storage_bucket": "something-528fe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571514401679:android:607d56889305e5ef4f91fa",
+        "android_client_info": {
+          "package_name": "com.someone.familytree"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHJDcAIHn7UnjSxlMbQpQl2sfOMVWFmH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
