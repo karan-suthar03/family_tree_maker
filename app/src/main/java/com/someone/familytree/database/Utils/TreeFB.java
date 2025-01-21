@@ -10,6 +10,8 @@ public class TreeFB {
     public int treeId;
     public FamilyMemberFB root;
     public String uId;
+    public int version;
+
     public TreeFB() {}
 
     // Getter and setter methods

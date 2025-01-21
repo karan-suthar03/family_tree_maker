@@ -9,8 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.someone.familytree.TreeMenu.TreeMenuActivity;
-import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
@@ -168,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
         singleMember root = new singleMember();
         root.name = "root";
         root.children = new ArrayList<>();
-//
 //        int depth = 5;
 //
 //        makeTree(root,depth);

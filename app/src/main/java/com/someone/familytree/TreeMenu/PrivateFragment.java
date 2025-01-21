@@ -26,6 +26,7 @@ import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
+import com.someone.familytree.database.MemberDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -272,9 +273,16 @@ public class PrivateFragment extends Fragment {
         treeMenuActivity.itemsSelected(0, false, selectedItems);
     }
 
+    static class SingleDetail{
+        String DetailName;
+        String Detail;
+        int DetailType;
+    }
+
     static class SingleMember{
         String Name;
         List<SingleMember> children;
+        List<SingleDetail> details = new ArrayList<>();
         SingleMember(String name){
             Name = name;
             children = new ArrayList<>();
@@ -309,6 +317,7 @@ public class PrivateFragment extends Fragment {
         String tempName = newName;
         while (true) {
             boolean found = false;
+            assert familyTreeTables != null;
             for (FamilyTreeTable familyTreeTable : familyTreeTables) {
                 if (familyTreeTable.getTreeName().equals(tempName)) {
                     found = true;
@@ -327,6 +336,10 @@ public class PrivateFragment extends Fragment {
     private void duplicateMembers(SingleMember root, int i, int treeId) {
         FamilyMember familyMember = new FamilyMember(root.Name, i, treeId);
         long id = DatabaseManager.insertMember(familyMember);
+        for (SingleDetail detail : root.details) {
+            MemberDetails memberDetails = new MemberDetails(detail.DetailName, detail.Detail, treeId, (int) id, detail.DetailType);
+            DatabaseManager.insertMemberDetails(memberDetails);
+        }
         for (SingleMember child : root.children) {
             duplicateMembers(child, (int) id, treeId);
         }
@@ -336,6 +349,16 @@ public class PrivateFragment extends Fragment {
         for (FamilyMember member : DatabaseManager.getChildren(id, treeId)) {
             SingleMember child = new SingleMember(member.getName());
             root.addChildren(child);
+            List<MemberDetails> memberDetails = DatabaseManager.getMemberDetails(member.getId(), treeId);
+            if (!memberDetails.isEmpty()) {
+                for (MemberDetails memberDetail : memberDetails) {
+                    SingleDetail singleDetail = new SingleDetail();
+                    singleDetail.Detail = memberDetail.getDetailValue();
+                    singleDetail.DetailName = memberDetail.getDetailName();
+                    singleDetail.DetailType = memberDetail.getDetailType();
+                    child.details.add(singleDetail);
+                }
+            }
             convertToSingleMember(child, member.getId(), treeId);
         }
     }

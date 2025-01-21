@@ -10,6 +10,7 @@ public class FamilyTreeTable {
     private int id;
     private String treeName;
     private String Uid;
+    private int version;
 
     public FamilyTreeTable(String treeName) {
         this.treeName = treeName;
@@ -37,6 +38,14 @@ public class FamilyTreeTable {
 
     public void setUid(String Uid) {
         this.Uid = Uid;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 
 }

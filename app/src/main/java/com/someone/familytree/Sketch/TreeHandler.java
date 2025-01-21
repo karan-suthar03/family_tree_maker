@@ -1,5 +1,7 @@
 package com.someone.familytree.Sketch;
 
+import android.util.Log;
+
 import com.someone.familytree.SingleMemberWI;
 import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
@@ -115,7 +117,16 @@ public class TreeHandler{
     }
 
     private static void convertToSingleMemberWI(SingleMemberWI parent, int id) {
+        Log.d("MemberId", id + "");
+        Log.d("MemberName", parent.name);
+        Log.d("TreeId", sketch.sketchActivity.treeId + "");
         for (FamilyMember member : DatabaseManager.getChildren(id,sketch.sketchActivity.treeId)) {
+            Log.d("MemberName", member.getName());
+            Log.d("MemberId", member.getId() + "");
+            Log.d("MemberParentId", member.getParentId() + "");
+            Log.d("MemberTreeId", member.getTreeId() + "");
+            Log.d("MemberId", member.getId() + "");
+            Log.d("MemberName", member.getName());
             SingleMemberWI child = new SingleMemberWI(member.getName(), member.getId(),sketch.sketchActivity.treeId);
             parent.addChildren(child);
             convertToSingleMemberWI(child, member.getId());

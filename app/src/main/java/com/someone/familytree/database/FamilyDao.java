@@ -73,6 +73,18 @@ public interface FamilyDao {
     @Delete
     void deleteMember(FamilyMember familyMember);
 
-    @Query("SELECT * FROM family_tree_members WHERE personUid = :personUid AND treeId = :treeId")
-    FamilyMember getMemberByUid(String personUid, int treeId);
+    @Query("SELECT * FROM family_tree_members WHERE myUid = :myUid AND treeId = :treeId")
+    FamilyMember getMemberByUid(String myUid, int treeId);
+
+    @Query("UPDATE family_tree SET version = :version WHERE id = :treeId")
+    void updateTreeVersion(int treeId, int version);
+
+    @Query("SELECT version FROM family_tree WHERE id = :treeId")
+    int getTreeVersion(int treeId);
+
+    @Query("SELECT * FROM family_tree WHERE id = :id")
+    FamilyTreeTable getTree(int id);
+
+    @Query("SELECT * FROM family_tree WHERE Uid = :treeUid")
+    FamilyTreeTable getTreeByUid(String treeUid);
 }

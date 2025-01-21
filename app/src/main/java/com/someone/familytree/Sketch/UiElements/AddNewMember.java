@@ -68,6 +68,11 @@ public class AddNewMember {
                     DatabaseManager.insertMember(familyMember);
                     if(id == 0){
                         TreeHandler.refreshTree();
+                        sketchActivity.runOnUiThread(() -> {
+                            if(sketchActivity.fab.getVisibility() == View.VISIBLE){
+                                sketchActivity.fab.setVisibility(View.GONE);
+                            }
+                        });
                     }else{
                         FamilyMember originalFamilyMember = DatabaseManager.getMember(id);
                         TreeHandler.refreshTree();
