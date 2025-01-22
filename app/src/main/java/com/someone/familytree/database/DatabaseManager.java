@@ -6,9 +6,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.someone.familytree.Authentication;
+import com.someone.familytree.AuthenticationActivity;
 import com.someone.familytree.database.Utils.DetailsFB;
 import com.someone.familytree.database.Utils.FamilyMemberFB;
 import com.someone.familytree.database.Utils.TreeFB;
@@ -94,7 +92,7 @@ public class DatabaseManager {
         familyDatabase.familyDao().updateParentId(id, newParentId, treeId);
     }
 
-    public static void init(Authentication authentication, FirebaseUser currentUser) {
+    public static void init(AuthenticationActivity authentication, FirebaseUser currentUser) {
         firebaseDatabase = FirebaseDatabase.getInstance();
         familyDatabase = FamilyDatabase.getDatabase(authentication);
 
@@ -227,12 +225,6 @@ public class DatabaseManager {
             putAllMembers(child, root.uId);
         }
         members.put(root.uId, member);
-    }
-
-    private static void printTree(TreeFB treeFB) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(treeFB);
-        Log.d("DatabaseManager", json);
     }
 
 
