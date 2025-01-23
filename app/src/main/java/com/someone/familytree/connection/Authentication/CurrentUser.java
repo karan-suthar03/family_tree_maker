@@ -4,18 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.someone.familytree.MyApplicationContextHelper;
+import com.someone.familytree.connection.services.UserService;
+
+import java.util.HashMap;
 
 public class CurrentUser {
     private static CurrentUser instance = null;
-    static SharedPreferences sharedPreferences = null;
     private CurrentUser() {
 
     }
 
-    public static CurrentUser getInstance() {
+    static CurrentUser getInstance() {
         if (instance == null) {
-            sharedPreferences = MyApplicationContextHelper.getInstance().getAppContext().getSharedPreferences("CurrentUser", Context.MODE_PRIVATE);
-            boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false);
+            boolean isLoggedIn = UserService.isLoggedIn();
             if (isLoggedIn) {
                 instance = new CurrentUser();
             }
@@ -23,19 +24,15 @@ public class CurrentUser {
         return instance;
     }
 
-    public void login(String username, String password) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("isLoggedIn", true);
-        editor.putString("username", username);
-        editor.putString("password", password);
-        editor.apply();
+    void logout() {
+        UserService.logout();
+        instance = null;
     }
 
-    public void logout() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("isLoggedIn", false);
-        editor.remove("username");
-        editor.remove("password");
-        editor.apply();
+    public String getUid() {
+        if (instance == null) {
+            return null;
+        }
+        return UserService.getUid();
     }
 }

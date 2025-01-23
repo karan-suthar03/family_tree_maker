@@ -2,36 +2,35 @@ package com.someone.familytree;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.someone.familytree.TreeMenu.TreeMenuActivity;
 import com.someone.familytree.connection.Authentication.Authentication;
 import com.someone.familytree.database.DatabaseManager;
+
+import java.util.Objects;
 
 public class AuthenticationActivity extends AppCompatActivity {
     private Authentication mAuth;
     private EditText editTextEmail, editTextPassword;
     private Button buttonLogin, buttonSignup;
+    private final String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
 
-
         mAuth = Authentication.getInstance();
 
-//        if (mAuth.getCurrentUser() != null) {
-//            goToMenu();
-//        }
+        if (mAuth.getCurrentUser() != null) {
+            goToMenu();
+        }
 
         // Find views
         editTextEmail = findViewById(R.id.editTextEmail);
@@ -41,13 +40,35 @@ public class AuthenticationActivity extends AppCompatActivity {
 
         // Signup button action
         buttonSignup.setOnClickListener(v -> {
-            String email = "karan.suthar@gmail.com";
-            String password = "karan1234";
+            String email = editTextEmail.getText().toString();
+            String password = editTextPassword.getText().toString();
+
+            email = email.trim();
+            password = password.trim();
+
+            if (email.isEmpty()) {
+                editTextEmail.setError("Email is required");
+                return;
+            }
+            if (password.isEmpty()) {
+                editTextPassword.setError("Password is required");
+                return;
+            }
+            if (password.length() < 6) {
+                editTextPassword.setError("Password must be at least 6 characters");
+                return;
+            }
+            if (!email.matches(emailPattern)) {
+                editTextEmail.setError("Invalid email address");
+                return;
+            }
 
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Toast.makeText(AuthenticationActivity.this, "Signup successful! Welcome, ", Toast.LENGTH_SHORT).show();
+                            goToMenu();
+                            Log.d("AUTH", "onCreate: " + task.getResult());
+                            Toast.makeText(AuthenticationActivity.this, "Signup successful"+ task.getResult().toString(), Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(AuthenticationActivity.this, "Signup failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -59,20 +80,50 @@ public class AuthenticationActivity extends AppCompatActivity {
             String email = editTextEmail.getText().toString();
             String password = editTextPassword.getText().toString();
 
-//            if (!email.isEmpty() && !password.isEmpty()) {
-//                mAuth.signInWithEmailAndPassword(email, password)
-//                        .addOnCompleteListener(task -> {
-//                            if (task.isSuccessful()) {
-//                                FirebaseUser user = mAuth.getCurrentUser();
-//                                Toast.makeText(AuthenticationActivity.this, "Login successful! Welcome, " + user.getEmail(), Toast.LENGTH_SHORT).show();
-//                                signUpSetup(user);
-//                            } else {
-//                                Toast.makeText(AuthenticationActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
-//            } else {
-//                Toast.makeText(AuthenticationActivity.this, "Please enter email and password", Toast.LENGTH_SHORT).show();
-//            }
+            email = email.trim();
+            password = password.trim();
+
+            if (email.isEmpty()) {
+                editTextEmail.setError("Email is required");
+                return;
+            }
+            if (password.isEmpty()) {
+                editTextPassword.setError("Password is required");
+                return;
+            }
+            if (password.length() < 6) {
+                editTextPassword.setError("Password must be at least 6 characters");
+                return;
+            }
+            if (!email.matches(emailPattern)) {
+                editTextEmail.setError("Invalid email address");
+                return;
+            }
+
+            mAuth.signInUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            goToMenu();
+                        } else {
+                            Objects.requireNonNull(task.getException()).printStackTrace();
+                            Toast.makeText(AuthenticationActivity.this, "Signup failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+    }
+
+    private void goToMenu(){
+        DatabaseManager.init(this);
+        DatabaseManager.updateAllTrees().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(AuthenticationActivity.this, task.getResult().toString(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, TreeMenuActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                task.getException().printStackTrace();
+                Toast.makeText(AuthenticationActivity.this, "Failed to update trees", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -114,13 +165,4 @@ public class AuthenticationActivity extends AppCompatActivity {
 //            }
 //        });
 //    }
-
-//    private void goToMenu(){
-//
-//        DatabaseManager.init(this, mAuth.getCurrentUser());
-//
-//        Intent intent = new Intent(this, TreeMenuActivity.class);
-//        startActivity(intent);
-//    }
-
 }

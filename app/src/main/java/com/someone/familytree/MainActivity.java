@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.someone.familytree.connection.Authentication.Authentication;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;

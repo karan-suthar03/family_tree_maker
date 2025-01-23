@@ -1,12 +1,16 @@
 package com.someone.familytree.database;
 
+import android.app.Activity;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.someone.familytree.AuthenticationActivity;
+import com.someone.familytree.connection.MyDatabase;
 import com.someone.familytree.database.Utils.DetailsFB;
 import com.someone.familytree.database.Utils.FamilyMemberFB;
 import com.someone.familytree.database.Utils.TreeFB;
@@ -17,7 +21,6 @@ import java.util.List;
 
 public class DatabaseManager {
     public static FamilyDatabase familyDatabase;
-    public static FirebaseDatabase firebaseDatabase;
     public static DatabaseReference userRef;
 
     public DatabaseManager(FamilyDatabase familyDatabase) {
@@ -92,24 +95,23 @@ public class DatabaseManager {
         familyDatabase.familyDao().updateParentId(id, newParentId, treeId);
     }
 
-    public static void init(AuthenticationActivity authentication, FirebaseUser currentUser) {
-        firebaseDatabase = FirebaseDatabase.getInstance();
+    public static void init(Activity authentication) {
         familyDatabase = FamilyDatabase.getDatabase(authentication);
-
-        assert currentUser != null;
-        userRef = firebaseDatabase.getReference("users").child(currentUser.getUid());
-
-        userRef.child("trees").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DataSnapshot snapshot = task.getResult();
-                if (snapshot.exists()) {
-//                    new Thread(() -> updateDatabase(snapshot)).start();
-                    printAllTrees();
-                }else{
-                    new Thread(DatabaseManager::uploadAllTrees).start();
-                }
-            }
-        });
+//
+//        assert currentUser != null;
+//        userRef = firebaseDatabase.getReference("users").child(currentUser.getUid());
+//
+//        userRef.child("trees").get().addOnCompleteListener(task -> {
+//            if (task.isSuccessful()) {
+//                DataSnapshot snapshot = task.getResult();
+//                if (snapshot.exists()) {
+////                    new Thread(() -> updateDatabase(snapshot)).start();
+//                    printAllTrees();
+//                }else{
+//                    new Thread(DatabaseManager::uploadAllTrees).start();
+//                }
+//            }
+//        });
     }
 
     private static void printAllTrees() {
@@ -278,4 +280,18 @@ public class DatabaseManager {
         return detailsFBS;
     }
 
+    public static Task<Object> updateAllTrees() {
+        MyDatabase myDatabase = MyDatabase.getInstance();
+        TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
+
+        myDatabase.getAllTrees().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                taskCompletionSource.setResult(task.getResult());
+            } else {
+                taskCompletionSource.setException(task.getException());
+            }
+        });
+
+        return taskCompletionSource.getTask();
+    }
 }
