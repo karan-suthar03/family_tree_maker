@@ -72,9 +72,7 @@ public class AddNewMember {
                         FamilyMember originalFamilyMember = DatabaseManager.getMember(id);
                         TreeHandler.refreshTree();
                         sketchActivity.runOnUiThread(() -> {
-                            if(sketchActivity.fab.getVisibility() == View.VISIBLE){
-                                sketchActivity.fab.setVisibility(View.GONE);
-                            }
+                            sketchActivity.fab.setVisibility(View.GONE);
                             uiHandler.personDetails.showPersonDetails(originalFamilyMember);
                         });
                     }

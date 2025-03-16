@@ -114,17 +114,21 @@ public class AuthenticationActivity extends AppCompatActivity {
 
     private void goToMenu(){
         DatabaseManager.init(this);
-        DatabaseManager.updateAllTrees().addOnCompleteListener(task -> {
+        DatabaseManager.updateMetaData().addOnCompleteListener((task) -> {
             if (task.isSuccessful()) {
-                Toast.makeText(AuthenticationActivity.this, task.getResult().toString(), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, TreeMenuActivity.class);
-                startActivity(intent);
-                finish();
+                Log.d("AUTH", "onCreate: " + task.getResult());
+                Toast.makeText(this, "Metadata updated", Toast.LENGTH_SHORT).show();
             } else {
-                task.getException().printStackTrace();
-                Toast.makeText(AuthenticationActivity.this, "Failed to update trees", Toast.LENGTH_SHORT).show();
+                Log.d("AUTH", "onCreate: " + task.getException());
+                Toast.makeText(this, "Metadata update failed", Toast.LENGTH_SHORT).show();
             }
         });
+        Intent intent = new Intent(this, TreeMenuActivity.class);
+        startActivity(intent);
+        finish();
+//        Intent intent = new Intent(this, TreeMenuActivity.class);
+//        startActivity(intent);
+//        finish();
     }
 
     static class NewUserTemplete {

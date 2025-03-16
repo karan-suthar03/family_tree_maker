@@ -68,4 +68,64 @@ public class DatabaseConnection {
         });
         return taskCompletionSource.getTask();
     }
+
+    public Task<Object> updateAllTreesOnServer(String jsonToSend) {
+        TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
+
+        Request request = new Request.Builder()
+                .url(url + TreeUrl + "update")
+                .post(okhttp3.RequestBody.create(
+                        okhttp3.MediaType.parse("application/json"),
+                        jsonToSend
+                ))
+                .build();
+
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                taskCompletionSource.setException(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    taskCompletionSource.setResult(response.body().string());
+                } else {
+                    taskCompletionSource.setException(new Exception("Failed to update trees"));
+                }
+            }
+        });
+        return taskCompletionSource.getTask();
+    }
+
+    public Task<Object> updateMetaData() {
+        TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
+
+        Request request = new Request.Builder()
+                .url(url + TreeUrl + "meta?uid=" + Authentication.getInstance().getCurrentUser().getUid())
+                .get()
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                taskCompletionSource.setException(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    taskCompletionSource.setResult(response.body().string());
+                } else {
+                    taskCompletionSource.setException(new Exception("Failed to update metadata"));
+                }
+            }
+        });
+        return taskCompletionSource.getTask();
+    }
 }

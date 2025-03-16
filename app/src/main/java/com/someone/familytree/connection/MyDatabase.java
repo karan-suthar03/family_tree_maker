@@ -20,4 +20,14 @@ public class MyDatabase {
         Connection connection = Connection.getInstance();
         return connection.getAllTrees();
     }
+
+    public Task<Object> updateAllTreesOnServer(String jsonToSend) {
+        Connection connection = Connection.getInstance();
+        return connection.updateAllTreesOnServer(jsonToSend);
+    }
+
+    public Task<Object> updateMetaData() {
+        Connection connection = Connection.getInstance();
+        return connection.updateMetaData();
+    }
 }

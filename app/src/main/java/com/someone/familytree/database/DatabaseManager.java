@@ -5,18 +5,9 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.someone.familytree.AuthenticationActivity;
 import com.someone.familytree.connection.MyDatabase;
-import com.someone.familytree.database.Utils.DetailsFB;
-import com.someone.familytree.database.Utils.FamilyMemberFB;
-import com.someone.familytree.database.Utils.TreeFB;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class DatabaseManager {
@@ -35,20 +26,49 @@ public class DatabaseManager {
         return familyDatabase.familyDao().getAllTrees();
     }
 
-    public static long insertTree(FamilyTreeTable familyTreeTable) {
-        return familyDatabase.familyDao().insertTree(familyTreeTable);
+
+    public static List<FamilyMember> getAllMembers(int treeId) {
+        return familyDatabase.familyDao().getAllMembers(treeId);
     }
 
-    public static void deleteTree(Integer id) {
+    public static FamilyMember getMemberByUid(String memberUid, long treeId){
+        return familyDatabase.familyDao().getMemberByUid(memberUid, (int) treeId);
+    }
+
+    public static void increaseTreeVersion(int treeId) {
+        FamilyTreeTable familyTreeTable = familyDatabase.familyDao().getTree(treeId);
+        if (familyTreeTable == null) {
+            return;
+        }
+        TreeMetaOffline treeMetaOffline = familyDatabase.familyDao().getTreeMetaOffline(familyTreeTable.getId());
+        treeMetaOffline.setTreeVersionOffline(treeMetaOffline.getTreeVersionOffline() + 1);
+        familyDatabase.familyDao().updateTreeMetaOffline(treeMetaOffline);
+    }
+
+    public static long insertTree(FamilyTreeTable familyTreeTable) {
+        long id = familyDatabase.familyDao().insertTree(familyTreeTable);
+        TreeMetaOffline treeMetaOffline = new TreeMetaOffline(familyTreeTable.getTreeName());
+        treeMetaOffline.setUid(familyTreeTable.getUid());
+        treeMetaOffline.setTreeId((int) id);
+        familyDatabase.familyDao().insertTreeMetaOffline(treeMetaOffline);
+        return id;
+    }
+
+    public static void deleteTree(int id) {
         familyDatabase.familyDao().deleteTree(id);
+        TreeMetaOffline treeMetaOffline = familyDatabase.familyDao().getTreeMetaOfflineByTreeId(id);
+        treeMetaOffline.setDeleted(true);
+        familyDatabase.familyDao().updateTreeMetaOffline(treeMetaOffline);
     }
 
     public static void deleteAllMembers(Integer id) {
         familyDatabase.familyDao().deleteAll(id);
+        increaseTreeVersion(id);
     }
 
     public static void updateTree(FamilyTreeTable familyTreeTable) {
         familyDatabase.familyDao().updateTree(familyTreeTable);
+        increaseTreeVersion(familyTreeTable.getId());
     }
 
     public static String getTreeName(int id) {
@@ -60,10 +80,12 @@ public class DatabaseManager {
     }
 
     public static long insertMember(FamilyMember familyMember) {
+        increaseTreeVersion(familyMember.getTreeId());
         return familyDatabase.familyDao().insertMember(familyMember);
     }
 
     public static void updateMember(FamilyMember familyMember) {
+        increaseTreeVersion(familyMember.getTreeId());
         familyDatabase.familyDao().updateMember(familyMember);
     }
 
@@ -76,222 +98,108 @@ public class DatabaseManager {
     }
 
     public static void updateMemberDetails(MemberDetails memberDetail) {
+        increaseTreeVersion(memberDetail.getTreeId());
         familyDatabase.familyDao().updateMemberDetails(memberDetail);
     }
 
     public static void insertMemberDetails(MemberDetails memberDetails) {
+        increaseTreeVersion(memberDetails.getTreeId());
         familyDatabase.familyDao().insertMemberDetails(memberDetails);
     }
 
     public static void deleteMember(int id, int treeId) {
+        increaseTreeVersion(treeId);
         familyDatabase.familyDao().deleteMember(id, treeId);
     }
 
     public static void deleteMemberDetails(int id, int treeId) {
+        increaseTreeVersion(treeId);
         familyDatabase.familyDao().deleteMemberDetails(id, treeId);
     }
 
+    public static FamilyTreeTable getTreeByUid(String treeUid) {
+        return familyDatabase.familyDao().getTreeByUid(treeUid);
+    }
+
     public static void updateParentId(int id, int newParentId, int treeId) {
+        increaseTreeVersion(treeId);
         familyDatabase.familyDao().updateParentId(id, newParentId, treeId);
     }
 
+    public static TreeMetaOnline getTreeMetaOnline(String treeUid) {
+        return familyDatabase.familyDao().getTreeMetaOnline(treeUid);
+    }
+
+    public static void insertTreeMetaOnline(TreeMetaOnline treeMetaOnline) {
+        familyDatabase.familyDao().insertTreeMetaOnline(treeMetaOnline);
+    }
+
+    public static void updateTreeMetaOnline(TreeMetaOnline treeMetaOnline) {
+        familyDatabase.familyDao().updateTreeMetaOnline(treeMetaOnline);
+    }
+
+    public static List<TreeMetaOffline> getTreeMeta(int id) {
+        return familyDatabase.familyDao().getTreeMeta(id);
+    }
     public static void init(Activity authentication) {
         familyDatabase = FamilyDatabase.getDatabase(authentication);
-//
-//        assert currentUser != null;
-//        userRef = firebaseDatabase.getReference("users").child(currentUser.getUid());
-//
-//        userRef.child("trees").get().addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                DataSnapshot snapshot = task.getResult();
-//                if (snapshot.exists()) {
-////                    new Thread(() -> updateDatabase(snapshot)).start();
-//                    printAllTrees();
-//                }else{
-//                    new Thread(DatabaseManager::uploadAllTrees).start();
-//                }
-//            }
-//        });
-    }
-
-    private static void printAllTrees() {
-        List<FamilyTreeTable> allTrees = getAllTrees();
-        for (FamilyTreeTable tree : allTrees) {
-            Log.d("DatabaseManager", "Tree: " + tree.getTreeName());
-            List<FamilyMember> children = getChildren(0, tree.getId());
-            for (FamilyMember child : children) {
-                Log.d("DatabaseManager", "Child: " + child.getName());
-                printChildren(child.getId(), tree.getId());
-            }
-        }
-    }
-
-    private static void printChildren(int id, int id1) {
-        List<FamilyMember> children = getChildren(id, id1);
-        for (FamilyMember child : children) {
-            Log.d("DatabaseManager", "Child: " + child.getName());
-            printChildren(child.getId(), id1);
-        }
-    }
-
-    private static void updateDatabase(DataSnapshot snapshot) {
-        for (DataSnapshot tree : snapshot.getChildren()) {
-            FamilyTreeTable familyTreeTable = new FamilyTreeTable(tree.child("treeName").getValue(String.class));
-            familyTreeTable.setUid(tree.getKey());
-            int treeId = (int) insertTree(familyTreeTable);
-            updateMembers(tree.child("members"), treeId);
-            updateDetails(tree.child("details"), treeId);
-        }
-    }
-
-    private static void updateDetails(DataSnapshot details, int treeId) {
-        for (DataSnapshot detail : details.getChildren()) {
-            MemberDetails memberDetails = new MemberDetails(detail.child("detailName").getValue(String.class), detail.child("detail").getValue(String.class), treeId, 0, (Integer) detail.child("detailType").getValue());
-            memberDetails.setMyUid(detail.getKey());
-            memberDetails.setPersonUid(detail.child("member").getValue(String.class));
-            memberDetails.setPersonId(getParentId(memberDetails.getPersonUid(), treeId));
-            insertMemberDetails(memberDetails);
-        }
-    }
-
-    private static void updateMembers(DataSnapshot members, int treeId) {
-        for (DataSnapshot member : members.getChildren()) {
-            FamilyMember familyMember = new FamilyMember(member.child("memberName").getValue(String.class), 0, treeId);
-            familyMember.setMyUid(member.getKey());
-            familyMember.setPersonUid(member.child("parent").getValue(String.class));
-            insertMember(familyMember);
-        }
-
-        List<FamilyMember> allMembers = familyDatabase.familyDao().getAllMembers(treeId);
-        for (FamilyMember member : allMembers) {
-            member.setParentId(getParentId(member.getPersonUid(), treeId));
-        }
-    }
-
-    private static int getParentId(String personUid, int treeId) {
-        FamilyMember member = familyDatabase.familyDao().getMemberByUid(personUid, treeId);
-        return member.getId();
     }
 
 
-    static HashMap<String, Object> trees = new HashMap<>();
-    static HashMap<String, Object> tree = new HashMap<>();
-    static HashMap<String, Object> members = new HashMap<>();
-    static HashMap<String, Object> details = new HashMap<>();
-
-    private static void uploadAllTrees() {
-        List<FamilyTreeTable> allTrees = getAllTrees();
-        List<TreeFB> treeFBS = new ArrayList<>();
-        for (FamilyTreeTable tree : allTrees) {
-            String uniqueId = userRef.push().getKey();
-            TreeFB treeFB = new TreeFB();
-            treeFB.treeName = tree.getTreeName();
-            treeFB.root = getFamilyMemberFB(tree.getId());
-            treeFB.uId = uniqueId;
-            treeFBS.add(treeFB);
-        }
-
-        for (TreeFB treeFB : treeFBS) {
-            members = new HashMap<>();
-            tree = new HashMap<>();
-            details = new HashMap<>();
-            tree.put("treeName", treeFB.treeName);
-            putAllMembers(treeFB.root,"root");
-            tree.put("members", members);
-            tree.put("details", details);
-            trees.put(treeFB.uId, tree);
-        }
-
-        userRef.child("trees").setValue(trees).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Log.d("DatabaseManager", "Trees uploaded successfully");
-            } else {
-                Log.d("DatabaseManager", "Trees upload failed: " + task.getException().getMessage());
-            }
-        });
-    }
-
-    private static void putAllMembers(FamilyMemberFB root, String parent) {
-        HashMap<String, Object> member = new HashMap<>();
-        member.put("memberName", root.getMemberName());
-        member.put("parent", parent);
-        for (DetailsFB detail : root.getDetails()) {
-            HashMap<String, Object> detailMap = new HashMap<>();
-            detailMap.put("detail", detail.getDetail());
-            detailMap.put("detailName", detail.getDetailName());
-            detailMap.put("detailType", detail.getDetailType());
-            detailMap.put("member", root.uId);
-            details.put(detail.uId, detailMap);
-        }
-        for (FamilyMemberFB child : root.getChildren()) {
-            putAllMembers(child, root.uId);
-        }
-        members.put(root.uId, member);
-    }
-
-
-    private static FamilyMemberFB getFamilyMemberFB(int i) {
-        FamilyMember child = getChildren(0, i).get(0);
-        if (child == null) {
-            return null;
-        }
-        String uniqueId = userRef.push().getKey();
-        FamilyMemberFB familyMemberFB = new FamilyMemberFB();
-        familyMemberFB.setMemberName(child.getName());
-        familyMemberFB.setDetails(getDetailsFB(child.getId(), i));
-        familyMemberFB.setChildren(getChildrenFB(child.getId(), i));
-        familyMemberFB.uId = uniqueId;
-        return familyMemberFB;
-    }
-
-    private static List<FamilyMemberFB> getChildrenFB(int id, int i) {
-        List<FamilyMember> children = getChildren(id, i);
-        if (children == null) {
-            return null;
-        }
-        List<FamilyMemberFB> familyMemberFBS = new ArrayList<>();
-        for (FamilyMember child : children) {
-            String uniqueId = userRef.push().getKey();
-            FamilyMemberFB familyMemberFB = new FamilyMemberFB();
-            familyMemberFB.setMemberName(child.getName());
-            familyMemberFB.setDetails(getDetailsFB(child.getId(), i));
-            familyMemberFB.setChildren(getChildrenFB(child.getId(), i));
-            familyMemberFB.uId = uniqueId;
-            familyMemberFBS.add(familyMemberFB);
-        }
-        return familyMemberFBS;
-    }
-
-    private static List<DetailsFB> getDetailsFB(int id, int id1) {
-        List<MemberDetails> memberDetails = getMemberDetails(id, id1);
-        if (memberDetails == null) {
-            return null;
-        }
-        List<DetailsFB> detailsFBS = new ArrayList<>();
-        for (MemberDetails memberDetail : memberDetails) {
-            String uniqueId = userRef.push().getKey();
-            DetailsFB detailsFB = new DetailsFB();
-            detailsFB.setDetail(memberDetail.getDetailValue());
-            detailsFB.setDetailName(memberDetail.getDetailName());
-            detailsFB.setDetailType(memberDetail.getDetailType());
-            detailsFB.uId = uniqueId;
-            detailsFBS.add(detailsFB);
-        }
-        return detailsFBS;
-    }
-
-    public static Task<Object> updateAllTrees() {
+    public static Task<Object> updateAllTreesFromServer() {
         MyDatabase myDatabase = MyDatabase.getInstance();
         TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
 
         myDatabase.getAllTrees().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                taskCompletionSource.setResult(task.getResult());
+                new Thread(() -> {
+                    Log.d("DatabaseManager", "updateAllTreesFromServer: task.getResult().toString(): " + task.getResult().toString());
+                    DataSync.updateDatabaseFromServer(task.getResult().toString());
+                    taskCompletionSource.setResult("Trees updated successfully");
+                }).start();
             } else {
                 taskCompletionSource.setException(task.getException());
             }
         });
+        return taskCompletionSource.getTask();
+    }
+    public static Task<Object> updateAllTreesFromDevice() {
+        MyDatabase myDatabase = MyDatabase.getInstance();
+        TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
+
+        new Thread(() -> {
+            String jsonToSend = DataSync.updateServerFromDevice();
+            Log.d("DatabaseManager", "updateAllTreesFromDevice: jsonToSend: " + jsonToSend);
+            myDatabase.updateAllTreesOnServer(jsonToSend).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    taskCompletionSource.setResult("Trees updated successfully");
+                } else {
+                    taskCompletionSource.setException(task.getException());
+                }
+            });
+        }).start();
 
         return taskCompletionSource.getTask();
+    }
+
+    public static Task<Object> updateMetaData() {
+        TaskCompletionSource<Object> completionSource = new TaskCompletionSource<>();
+        MyDatabase myDatabase = MyDatabase.getInstance();
+        myDatabase.updateMetaData().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                new Thread(() -> {
+                    completionSource.setResult(task.getResult());
+                    DataSync.updateMetadataFromServer(task.getResult().toString());
+                }).start();
+            } else {
+                completionSource.setException(task.getException());
+            }
+        });
+        return completionSource.getTask();
+    }
+
+
+    public static List<TreeMetaOffline> getAllOfflineTrees() {
+        return familyDatabase.familyDao().getAllOfflineTrees();
     }
 }

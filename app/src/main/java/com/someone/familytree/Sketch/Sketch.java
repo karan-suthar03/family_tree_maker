@@ -179,7 +179,6 @@ public class Sketch extends PApplet {
         }
     }
 
-    // Called when a touch ends (one or more fingers)
     public void touchEnded() {
 
         float dist = lastTouch1.dist(lastTouch2);
@@ -187,9 +186,7 @@ public class Sketch extends PApplet {
             TouchInPut(lastTouch2.x, lastTouch2.y);
         }
 
-        // Reset dragging state
         isDragging = false;
-        // Reset zooming state
         lastTouchDist = 0;
     }
 
