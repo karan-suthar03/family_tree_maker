@@ -108,4 +108,7 @@ public interface FamilyDao {
 
     @Query("SELECT * FROM tree_meta_offline")
     List<TreeMetaOffline> getAllOfflineTrees();
+
+    @Query("SELECT * FROM tree_meta_online")
+    List<TreeMetaOnline> getAllOnlineTrees();
 }

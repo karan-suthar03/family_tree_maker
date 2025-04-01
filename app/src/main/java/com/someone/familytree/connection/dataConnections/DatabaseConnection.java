@@ -128,4 +128,35 @@ public class DatabaseConnection {
         });
         return taskCompletionSource.getTask();
     }
+
+    public Task<Object> uploadTreeToServer(String jsonToSend) {
+        TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
+
+        Request request = new Request.Builder()
+                .url(url + TreeUrl + "singleTree")
+                .post(okhttp3.RequestBody.create(
+                        okhttp3.MediaType.parse("application/json"),
+                        jsonToSend
+                ))
+                .build();
+
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                taskCompletionSource.setException(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    taskCompletionSource.setResult(response.body().string());
+                } else {
+                    taskCompletionSource.setException(new Exception("Failed to upload tree"));
+                }
+            }
+        });
+        return taskCompletionSource.getTask();
+    }
 }

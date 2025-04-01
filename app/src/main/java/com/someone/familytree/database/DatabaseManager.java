@@ -202,4 +202,29 @@ public class DatabaseManager {
     public static List<TreeMetaOffline> getAllOfflineTrees() {
         return familyDatabase.familyDao().getAllOfflineTrees();
     }
+
+    public static FamilyTreeTable getFamilyTreeTable(int treeId) {
+        return familyDatabase.familyDao().getTree(treeId);
+    }
+
+    public static List<TreeMetaOnline> getAllOnlineTrees() {
+        return familyDatabase.familyDao().getAllOnlineTrees();
+    }
+
+    public static Task<Object> uploadTree(FamilyTreeTable familyTreeTable) {
+        TaskCompletionSource<Object> taskCompletionSource = new TaskCompletionSource<>();
+        MyDatabase myDatabase = MyDatabase.getInstance();
+        new Thread(() -> {
+            String jsonToSend = DataSync.uploadTree(familyTreeTable);
+            Log.d("haha", "uploadTree: jsonToSend: " + jsonToSend);
+            myDatabase.uploadTreeToServer(jsonToSend).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    taskCompletionSource.setResult("Tree uploaded successfully");
+                } else {
+                    taskCompletionSource.setException(task.getException());
+                }
+            });
+        }).start();
+        return taskCompletionSource.getTask();
+    }
 }

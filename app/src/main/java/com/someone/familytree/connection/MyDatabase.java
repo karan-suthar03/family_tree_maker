@@ -30,4 +30,9 @@ public class MyDatabase {
         Connection connection = Connection.getInstance();
         return connection.updateMetaData();
     }
+
+    public Task<Object> uploadTreeToServer(String jsonToSend) {
+        Connection connection = Connection.getInstance();
+        return connection.uploadTreeToServer(jsonToSend);
+    }
 }

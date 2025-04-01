@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.recyclerview.selection)
     annotationProcessor(libs.room.compiler)
     implementation(libs.gson)
     implementation(libs.material.vlatestversion)

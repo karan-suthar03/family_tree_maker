@@ -11,4 +11,8 @@
         android:id="@+id/edit"
         android:title="Edit"
         android:visible="true"/>
+    <item
+        android:id="@+id/upload"
+        android:title="upload"
+        android:visible="true"/>
 </menu>

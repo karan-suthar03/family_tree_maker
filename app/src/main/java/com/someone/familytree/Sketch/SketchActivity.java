@@ -1,5 +1,6 @@
 package com.someone.familytree.Sketch;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -13,6 +14,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.someone.familytree.R;
 import com.someone.familytree.SingleMemberWI;
 import com.someone.familytree.Sketch.UiElements.UiHandler;
+import com.someone.familytree.TreeMenu.TreeMenuActivity;
 import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 
@@ -55,6 +57,7 @@ public class SketchActivity extends AppCompatActivity {
                     fragment.dispose(); // Dispose of any resources related to the fragment
                 }
                 finish();
+                startActivity(new Intent(SketchActivity.this, TreeMenuActivity.class));
             }
         };
 

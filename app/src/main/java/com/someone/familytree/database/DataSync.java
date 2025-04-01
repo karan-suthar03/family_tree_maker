@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.someone.familytree.connection.Authentication.Authentication;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,66 @@ import java.util.List;
 import java.util.UUID;
 
 public class DataSync {
+
+    public static class SendingMemberData {
+        String name;
+        String uid;
+        List<SendingMemberData> children;
+
+    }
+
+    public static class SendingData {
+        String treeName;
+        String treeUid;
+        String treeVersion;
+        String userUid;
+        SendingMemberData root;
+    }
+
+    public static String uploadTree(FamilyTreeTable familyTreeTable) {
+        List<FamilyMember> member = DatabaseManager.getChildren(0, familyTreeTable.getId());
+        SendingData sendingData = new SendingData();
+        sendingData.treeName = familyTreeTable.getTreeName();
+        if (familyTreeTable.getUid() == null || familyTreeTable.getUid().isEmpty()) {
+            String uid = generateUid();
+            familyTreeTable.setUid(uid);
+            sendingData.treeUid = uid;
+            DatabaseManager.updateTree(familyTreeTable);
+        } else {
+            sendingData.treeUid = familyTreeTable.getUid();
+        }
+        SendingMemberData root = createSendingMember(member.get(0), familyTreeTable.getId());
+        sendingData.root = root;
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        List<TreeMetaOffline> treeMetaOfflines = DatabaseManager.getTreeMeta(familyTreeTable.getId());
+        if (treeMetaOfflines != null && !treeMetaOfflines.isEmpty()) {
+            sendingData.treeVersion = String.valueOf(treeMetaOfflines.get(0).getTreeVersionOffline());
+        }
+        sendingData.userUid = Authentication.getInstance().getCurrentUser().getUid();
+        return gson.toJson(sendingData);
+    }
+
+    private static SendingMemberData createSendingMember(FamilyMember familyMember, int id) {
+        SendingMemberData sendingMember = new SendingMemberData();
+        sendingMember.name = familyMember.getName();
+        if (familyMember.getMyUid() == null || familyMember.getMyUid().isEmpty()) {
+            String uid = generateUid();
+            familyMember.setMyUid(uid);
+            sendingMember.uid = uid;
+            DatabaseManager.updateMember(familyMember);
+        } else {
+            sendingMember.uid = familyMember.getMyUid();
+        }
+        List<FamilyMember> children = DatabaseManager.getChildren(familyMember.getId(), id);
+        if (children != null && !children.isEmpty()) {
+            sendingMember.children = new ArrayList<>();
+            for (FamilyMember child : children) {
+                SendingMemberData childMember = createSendingMember(child, id);
+                sendingMember.children.add(childMember);
+            }
+        }
+        return sendingMember;
+    }
 
     public static class onlineMeta {
         int id;
@@ -49,7 +110,7 @@ public class DataSync {
         }
     }
 
-    public static class RecivedData {
+    public static class ReceivedData {
         String memberId;
         String memberName;
         String memberUid;
@@ -59,9 +120,9 @@ public class DataSync {
         String personUid;
         String treeId;
 
-        public RecivedData(String memberId, String memberName, String memberUid,
-                           String parentId, String treeUid, String treeName,
-                           String personUid, String treeId) {
+        public ReceivedData(String memberId, String memberName, String memberUid,
+                            String parentId, String treeUid, String treeName,
+                            String personUid, String treeId) {
             this.memberId = memberId;
             this.memberName = memberName;
             this.memberUid = memberUid;
@@ -76,7 +137,7 @@ public class DataSync {
     static class Tree {
         String treeName;
         String treeUid;
-        HashMap<Integer, List<RecivedData>> members = new HashMap<>();
+        HashMap<Integer, List<ReceivedData>> members = new HashMap<>();
     }
 
     static class SaveTree {
@@ -100,15 +161,15 @@ public class DataSync {
         }
     }
     public static void updateDatabaseFromServer(String jsonString) {
-        List<RecivedData> data = new ArrayList<>();
+        List<ReceivedData> data = new ArrayList<>();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonElement jsonElement = JsonParser.parseString(jsonString);
         for (JsonElement element : jsonElement.getAsJsonArray()) {
-            RecivedData record = gson.fromJson(element, RecivedData.class);
+            ReceivedData record = gson.fromJson(element, ReceivedData.class);
             data.add(record);
         }
         HashMap<String, Tree> trees = new HashMap<>();
-        for (RecivedData singleData : data) {
+        for (ReceivedData singleData : data) {
             Tree tree = trees.get(singleData.treeUid);
             if (tree == null) {
                 tree = new Tree();
@@ -118,7 +179,7 @@ public class DataSync {
             }
             // Use parentId as key (converted to int) to group children.
             int parentKey = Integer.parseInt(singleData.parentId);
-            List<RecivedData> membersList = tree.members.get(parentKey);
+            List<ReceivedData> membersList = tree.members.get(parentKey);
             if (membersList == null) {
                 membersList = new ArrayList<>();
                 tree.members.put(parentKey, membersList);
@@ -133,7 +194,7 @@ public class DataSync {
             saveTree.treeName = tree.treeName;
             saveTree.treeUid = tree.treeUid;
 
-            List<RecivedData> roots = tree.members.get(0);
+            List<ReceivedData> roots = tree.members.get(0);
             if (roots == null || roots.isEmpty()) {
                 System.out.println("No root member found for tree: " + tree.treeUid);
                 continue;
@@ -142,15 +203,15 @@ public class DataSync {
             saveReceivedData(saveTree);
         }
     }
-    private static RecivedMember buildMember(RecivedData data, HashMap<Integer, List<RecivedData>> members) {
+    private static RecivedMember buildMember(ReceivedData data, HashMap<Integer, List<ReceivedData>> members) {
         RecivedMember member = new RecivedMember();
         member.memberName = data.memberName;
         member.memberUid = data.memberUid;
         member.children = new ArrayList<>();
         int currentMemberId = Integer.parseInt(data.memberId);
-        List<RecivedData> childrenData = members.get(currentMemberId);
+        List<ReceivedData> childrenData = members.get(currentMemberId);
         if (childrenData != null) {
-            for (RecivedData childData : childrenData) {
+            for (ReceivedData childData : childrenData) {
                 RecivedMember childMember = buildMember(childData, members);
                 member.children.add(childMember);
             }

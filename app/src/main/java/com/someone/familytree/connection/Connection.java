@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient;
 
 public class Connection {
     private static Connection instance = null;
-    private static final String url = "https://19e1-152-58-17-93.ngrok-free.app/";
+    private static final String url = "https://73d3-152-58-17-93.ngrok-free.app/";
     private static OkHttpClient client = new OkHttpClient();
     private static UserConnection userConnection;
     private static DatabaseConnection databaseConnection;
@@ -45,5 +45,9 @@ public class Connection {
 
     public Task<Object> updateMetaData() {
         return databaseConnection().updateMetaData();
+    }
+
+    public Task<Object> uploadTreeToServer(String jsonToSend) {
+        return databaseConnection().uploadTreeToServer(jsonToSend);
     }
 }
