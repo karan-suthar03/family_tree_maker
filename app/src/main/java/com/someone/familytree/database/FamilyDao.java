@@ -75,4 +75,40 @@ public interface FamilyDao {
 
     @Query("SELECT * FROM family_tree_members WHERE personUid = :personUid AND treeId = :treeId")
     FamilyMember getMemberByUid(String personUid, int treeId);
+
+    @Query("SELECT * FROM family_tree WHERE uId = :uId")
+    FamilyTreeTable getTreeByUid(String uId);
+
+    @Insert
+    void insertTreeMetaOffline(TreeMetaOffline treeMetaOffline);
+
+    @Query("SELECT * FROM family_tree WHERE id = :treeId")
+    FamilyTreeTable getTree(int treeId);
+
+    @Query("SELECT * FROM tree_meta_offline WHERE treeId = :id")
+    TreeMetaOffline getTreeMetaOffline(int id);
+
+    @Update
+    void updateTreeMetaOffline(TreeMetaOffline treeMetaOffline);
+
+    @Query("SELECT * FROM tree_meta_offline WHERE treeId = :id")
+    TreeMetaOffline getTreeMetaOfflineByTreeId(int id);
+
+    @Query("SELECT * FROM tree_meta_online WHERE Uid = :treeUid")
+    TreeMetaOnline getTreeMetaOnline(String treeUid);
+
+    @Insert
+    void insertTreeMetaOnline(TreeMetaOnline treeMetaOnline);
+
+    @Update
+    void updateTreeMetaOnline(TreeMetaOnline treeMetaOnline);
+
+    @Query("SELECT * FROM tree_meta_offline WHERE treeId = :id")
+    List<TreeMetaOffline> getTreeMeta(int id);
+
+    @Query("SELECT * FROM tree_meta_offline")
+    List<TreeMetaOffline> getAllOfflineTrees();
+
+    @Query("SELECT * FROM tree_meta_online")
+    List<TreeMetaOnline> getAllOnlineTrees();
 }

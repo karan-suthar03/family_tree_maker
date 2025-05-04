@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.recyclerview.selection)
     annotationProcessor(libs.room.compiler)
     implementation(libs.gson)
     implementation(libs.material.vlatestversion)
@@ -47,4 +48,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation(libs.okhttp)
+    implementation(libs.gson.v2110)
 }

@@ -1,20 +1,18 @@
 package com.someone.familytree.database;
 
-import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "family_tree")
-public class FamilyTreeTable {
+@Entity(tableName = "tree_meta_online")
+public class TreeMetaOnline {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String treeName;
     private String Uid;
+    private int treeId;
+    private String treeVersionOnline;
 
-    @ColumnInfo(defaultValue = "0")
-    private int version;
-
-    public FamilyTreeTable(String treeName) {
+    public TreeMetaOnline(String treeName) {
         this.treeName = treeName;
     }
 
@@ -42,12 +40,19 @@ public class FamilyTreeTable {
         this.Uid = Uid;
     }
 
-    public int getVersion() {
-        return version;
+    public int getTreeId() {
+        return treeId;
     }
 
-    public void setVersion(int version) {
-        this.version = version;
+    public void setTreeId(int treeId) {
+        this.treeId = treeId;
     }
 
+    public String getTreeVersionOnline() {
+        return treeVersionOnline;
+    }
+
+    public void setTreeVersionOnline(String treeVersionOnline) {
+        this.treeVersionOnline = treeVersionOnline;
+    }
 }

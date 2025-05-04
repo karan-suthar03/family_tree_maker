@@ -15,17 +15,28 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.selection.ItemDetailsLookup;
+import androidx.recyclerview.selection.SelectionPredicates;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.someone.familytree.R;
 import com.someone.familytree.Sketch.SketchActivity;
 import com.someone.familytree.database.DatabaseManager;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
+import com.someone.familytree.database.TreeMetaOffline;
+import com.someone.familytree.database.TreeMetaOnline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,14 +71,17 @@ public class PrivateFragment extends Fragment {
 
     private void generateList() {
         new Thread(() -> {
-            List<FamilyTreeTable> familyTreeTableList = DatabaseManager.getAllTrees();
-
-            if (familyTreeTableList == null) {
+            List<TreeMetaOffline> treeMetaOfflineList = DatabaseManager.getAllOfflineTrees();
+            if (treeMetaOfflineList == null) {
                 return;
             }
 
-            for (FamilyTreeTable familyTreeTable : familyTreeTableList) {
-                itemList.add(new Item(familyTreeTable.getTreeName(), familyTreeTable.getId()));
+            for (TreeMetaOffline treeMetaOffline : treeMetaOfflineList) {
+                Item item = new Item(treeMetaOffline.getTreeName(), treeMetaOffline.getTreeId());
+                item.setDescription(treeMetaOffline.getTreeVersionOffline()+"");
+                item.setMetaId(treeMetaOffline.getId());
+                item.setTreeVersionOffline(treeMetaOffline.getTreeVersionOffline());
+                itemList.add(item);
             }
 
             ImageButton addTreeButton = view.findViewById(R.id.fab);
@@ -85,8 +99,22 @@ public class PrivateFragment extends Fragment {
                     View itemView = inflater1.inflate(R.layout.menu_tree_item, listOfTrees, false);
                     CheckBox checkBox = itemView.findViewById(R.id.checkBox);
                     TextView textView = itemView.findViewById(R.id.item_text);
+                    TextView description = itemView.findViewById(R.id.childCount);
+                    description.setText(item.getDescription());
                     Log.d("TreeMenuActivity", "Adding item: " + item.getTreeName());
                     textView.setText(item.getTreeName());
+                    
+                    // Handle upload status icon visibility based on network connectivity
+                    ImageView uploadStatus = itemView.findViewById(R.id.uploadStatus);
+                    NetworkUtils.checkAppOnline(requireContext(), isOnline -> {
+                        if (isOnline) {
+                            uploadStatus.setVisibility(View.VISIBLE);
+                            uploadStatus.setImageResource(R.drawable.upload_synced);
+                        } else {
+                            uploadStatus.setVisibility(View.GONE);
+                        }
+                    });
+                    
                     checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                         Log.d("TreeMenuActivity", "Checkbox checked: " + isChecked);
                         if (isChecked) {
@@ -198,7 +226,6 @@ public class PrivateFragment extends Fragment {
                 long treeId = DatabaseManager.insertTree(familyTreeTable);
                 Log.d("TreeMenuActivity", "Tree id: " + treeId);
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    itemList.add(new Item(familyTreeTable.getTreeName(), (int) treeId));
                     refreshList();
                     dialog.dismiss();
                 });

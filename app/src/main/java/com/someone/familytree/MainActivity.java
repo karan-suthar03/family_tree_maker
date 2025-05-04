@@ -9,8 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.someone.familytree.TreeMenu.TreeMenuActivity;
-import com.someone.familytree.database.DatabaseManager;
+import com.someone.familytree.connection.Authentication.Authentication;
 import com.someone.familytree.database.FamilyDatabase;
 import com.someone.familytree.database.FamilyMember;
 import com.someone.familytree.database.FamilyTreeTable;
@@ -154,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        Intent intent = new Intent(MainActivity.this, Authentication.class);
+        Intent intent = new Intent(MainActivity.this, AuthenticationActivity.class);
         startActivity(intent);
         finish();
 
